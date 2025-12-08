@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #0F172A;
+  color: #F8FAFC;
+}
+
+.glass-panel {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Countdown number animation */
+@keyframes flip {
+  0% { transform: rotateX(0deg); }
+  50% { transform: rotateX(-90deg); }
+  100% { transform: rotateX(0deg); }
+}
+
+.countdown-number {
+  animation: flip 0.3s ease-in-out;
+}
