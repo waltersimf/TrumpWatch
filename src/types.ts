@@ -8,6 +8,13 @@ export interface QuoteData {
   value: string;
   appeared_at: string;
   source_url?: string;
+  source?: string;
+}
+
+export interface GasPriceData {
+  price: number;
+  baseline_price: number;
+  date: string;
 }
 
 export interface TruthPost {
@@ -38,8 +45,12 @@ export interface CountdownTime {
 export interface DashboardState {
   debt: DebtData | null;
   eoCount: number | null;
-  quote: QuoteData | null;
-  latestPost: TruthPost | null;
+  quotes: QuoteData[];
+  currentQuoteIndex: number;
+  gasPrice: GasPriceData | null;
+  approvalRating: number;
+  golfDays: number;
+  truthPostsCount: number | null;
   loading: boolean;
   error: string | null;
 }
