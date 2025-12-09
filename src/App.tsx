@@ -5,6 +5,7 @@ import {
   fetchExecutiveOrdersCount,
   fetchMultipleQuotes,
   fetchGasPrice,
+  fetchApprovalRating,
   fetchTruthPostsCount
 } from './services/api';
 import Countdown from './components/Countdown';
@@ -20,7 +21,7 @@ const App: React.FC = () => {
     quotes: [],
     currentQuoteIndex: 0,
     gasPrice: null,
-    approvalRating: 43, // Hardcoded
+    approvalRating: null,
     golfDays: 89, // Hardcoded
     truthPostsCount: null,
     loading: true,
@@ -30,11 +31,12 @@ const App: React.FC = () => {
   const loadData = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const [debtData, eoData, quotesData, gasPriceData, truthCount] = await Promise.all([
+      const [debtData, eoData, quotesData, gasPriceData, approvalData, truthCount] = await Promise.all([
         fetchNationalDebt(),
         fetchExecutiveOrdersCount(),
         fetchMultipleQuotes(7),
         fetchGasPrice(),
+        fetchApprovalRating(),
         fetchTruthPostsCount()
       ]);
 
@@ -44,6 +46,7 @@ const App: React.FC = () => {
         eoCount: eoData,
         quotes: quotesData,
         gasPrice: gasPriceData,
+        approvalRating: approvalData,
         truthPostsCount: truthCount,
         loading: false,
         error: null

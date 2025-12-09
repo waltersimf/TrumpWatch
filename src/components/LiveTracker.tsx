@@ -1,11 +1,11 @@
 import React from 'react';
 import { DollarSign, TrendingUp, BarChart3, Zap, TreePine, MessageCircle } from 'lucide-react';
-import { DebtData, GasPriceData } from '../types';
+import { DebtData, GasPriceData, ApprovalData } from '../types';
 
 interface LiveTrackerProps {
   debt: DebtData | null;
   gasPrice: GasPriceData | null;
-  approvalRating: number;
+  approvalRating: ApprovalData | null;
   eoCount: number | null;
   golfDays: number;
   truthPostsCount: number | null;
@@ -110,8 +110,10 @@ const LiveTracker: React.FC<LiveTrackerProps> = ({
         <StatItem
           icon={<BarChart3 size={16} />}
           label="Approval Rating"
-          value={`${approvalRating}%`}
-          subValue="-2% this month"
+          value={approvalRating ? `${approvalRating.approve}%` : '---'}
+          subValue={approvalRating?.monthChange !== null && approvalRating?.monthChange !== undefined
+            ? `${approvalRating.monthChange >= 0 ? '+' : ''}${approvalRating.monthChange}% this month`
+            : 'Loading...'}
           color="text-blue-500"
           loading={loading}
         />

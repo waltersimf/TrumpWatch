@@ -17,6 +17,14 @@ export interface GasPriceData {
   date: string;
 }
 
+export interface ApprovalData {
+  approve: number;
+  disapprove: number;
+  monthChange: number | null;
+  pollDate: string;
+  pollster: string;
+}
+
 export interface TruthPost {
   id: string;
   content: string;
@@ -48,7 +56,7 @@ export interface DashboardState {
   quotes: QuoteData[];
   currentQuoteIndex: number;
   gasPrice: GasPriceData | null;
-  approvalRating: number;
+  approvalRating: ApprovalData | null;
   golfDays: number;
   truthPostsCount: number | null;
   loading: boolean;

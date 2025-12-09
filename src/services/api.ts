@@ -1,4 +1,4 @@
-import { DebtData, QuoteData, GasPriceData, TruthPost } from '../types';
+import { DebtData, QuoteData, GasPriceData, ApprovalData, TruthPost } from '../types';
 
 // Constants
 const TERM_START_DATE = '2025-01-20';
@@ -6,6 +6,7 @@ const TREASURY_API = 'https://api.fiscaldata.treasury.gov/services/api/fiscal_se
 const FEDERAL_REGISTER_API = 'https://www.federalregister.gov/api/v1/documents.json';
 const QUOTE_API = 'https://api.tronalddump.io';
 const GAS_PRICE_API = 'https://api.eia.gov/v2/petroleum/pri/gnd/data/';
+const VOTEHUB_API = 'https://votehub.com/api/polls';
 const TRUTH_SOCIAL_ARCHIVE = 'https://raw.githubusercontent.com/stiles/trump-truth-social-archive/main/truth_archive.json';
 
 // Fallback quotes if API fails
@@ -189,6 +190,69 @@ export const fetchGasPrice = async (): Promise<GasPriceData> => {
       price: 3.42,
       baseline_price: 3.11,
       date: new Date().toISOString().split('T')[0]
+    };
+  }
+};
+
+export const fetchApprovalRating = async (): Promise<ApprovalData> => {
+  try {
+    const url = `${VOTEHUB_API}?poll_type=approval&subject=donald-trump`;
+    const res = await fetch(url);
+
+    if (!res.ok) throw new Error('VoteHub API failed');
+
+    const json = await res.json();
+
+    if (Array.isArray(json) && json.length > 0) {
+      // Get the latest poll (first in array, assuming sorted by date desc)
+      const latestPoll = json[0];
+      const approveAnswer = latestPoll.answers?.find((a: any) =>
+        a.label?.toLowerCase().includes('approve') && !a.label?.toLowerCase().includes('disapprove')
+      );
+      const disapproveAnswer = latestPoll.answers?.find((a: any) =>
+        a.label?.toLowerCase().includes('disapprove')
+      );
+
+      const currentApprove = approveAnswer?.pct || 0;
+
+      // Try to find previous month's poll for comparison
+      let monthChange: number | null = null;
+      if (json.length > 1) {
+        const now = new Date();
+        const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+
+        const previousPoll = json.find((poll: any) => {
+          const pollDate = new Date(poll.end_date || poll.created_at);
+          return pollDate <= oneMonthAgo;
+        });
+
+        if (previousPoll) {
+          const prevApprove = previousPoll.answers?.find((a: any) =>
+            a.label?.toLowerCase().includes('approve') && !a.label?.toLowerCase().includes('disapprove')
+          )?.pct || 0;
+          monthChange = currentApprove - prevApprove;
+        }
+      }
+
+      return {
+        approve: currentApprove,
+        disapprove: disapproveAnswer?.pct || 0,
+        monthChange,
+        pollDate: latestPoll.end_date || latestPoll.created_at || new Date().toISOString(),
+        pollster: latestPoll.pollster || latestPoll.source || 'VoteHub'
+      };
+    }
+
+    throw new Error('No approval data returned');
+  } catch (error) {
+    console.error("Error fetching approval rating:", error);
+    // Fallback data
+    return {
+      approve: 43,
+      disapprove: 53,
+      monthChange: -2,
+      pollDate: new Date().toISOString(),
+      pollster: 'Aggregate'
     };
   }
 };
