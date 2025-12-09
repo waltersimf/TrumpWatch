@@ -1,14 +1,16 @@
 import React from 'react';
-import { DollarSign, TrendingUp, BarChart3, Zap, TreePine, MessageCircle } from 'lucide-react';
-import { DebtData, GasPriceData, ApprovalData } from '../types';
+import { DollarSign, TrendingUp, Zap, BarChart3, Users, Percent, Bitcoin, CircleDollarSign } from 'lucide-react';
+import { DebtData, GasPriceData, SP500Data, UnemploymentData, InflationData, BitcoinData, GoldData } from '../types';
 
 interface LiveTrackerProps {
   debt: DebtData | null;
   gasPrice: GasPriceData | null;
-  approvalRating: ApprovalData | null;
   eoCount: number | null;
-  golfDays: number;
-  truthPostsCount: number | null;
+  sp500: SP500Data | null;
+  unemployment: UnemploymentData | null;
+  inflation: InflationData | null;
+  bitcoin: BitcoinData | null;
+  gold: GoldData | null;
   loading: boolean;
 }
 
@@ -48,10 +50,12 @@ const StatItem: React.FC<StatItemProps> = ({ icon, label, value, subValue, color
 const LiveTracker: React.FC<LiveTrackerProps> = ({
   debt,
   gasPrice,
-  approvalRating,
   eoCount,
-  golfDays,
-  truthPostsCount,
+  sp500,
+  unemployment,
+  inflation,
+  bitcoin,
+  gold,
   loading
 }) => {
   // Format debt
@@ -70,11 +74,22 @@ const LiveTracker: React.FC<LiveTrackerProps> = ({
   const gasPriceChange = gasPrice ? gasPrice.price - gasPrice.baseline_price : 0;
   const formatGasChange = (val: number): string => {
     const prefix = val >= 0 ? '+' : '';
-    return `${prefix}$${val.toFixed(2)}`;
+    return `${prefix}$${val.toFixed(2)} since Jan 20`;
   };
 
-  // Calculate today's posts (mock - would need real-time data)
-  const todayPosts = 23; // Hardcoded as per design
+  // Format S&P 500
+  const formatSP500Change = (data: SP500Data | null): string => {
+    if (!data) return 'Loading...';
+    const prefix = data.changePercent >= 0 ? '+' : '';
+    return `${prefix}${data.changePercent.toFixed(2)}% today`;
+  };
+
+  // Format Bitcoin change
+  const formatBtcChange = (data: BitcoinData | null): string => {
+    if (!data) return 'Loading...';
+    const prefix = data.change24h >= 0 ? '+' : '';
+    return `${prefix}${data.change24h.toFixed(1)}% 24h`;
+  };
 
   return (
     <section className="mt-8">
@@ -84,7 +99,7 @@ const LiveTracker: React.FC<LiveTrackerProps> = ({
         <h3 className="text-white font-semibold">Live Tracker</h3>
       </div>
 
-      {/* Stats grid - 2 columns */}
+      {/* Stats grid - 2 columns x 4 rows */}
       <div className="grid grid-cols-2 gap-3">
         {/* National Debt */}
         <StatItem
@@ -106,18 +121,6 @@ const LiveTracker: React.FC<LiveTrackerProps> = ({
           loading={loading}
         />
 
-        {/* Approval Rating */}
-        <StatItem
-          icon={<BarChart3 size={16} />}
-          label="Approval Rating"
-          value={approvalRating ? `${approvalRating.approve}%` : '---'}
-          subValue={approvalRating?.monthChange !== null && approvalRating?.monthChange !== undefined
-            ? `${approvalRating.monthChange >= 0 ? '+' : ''}${approvalRating.monthChange}% this month`
-            : 'Loading...'}
-          color="text-blue-500"
-          loading={loading}
-        />
-
         {/* Executive Orders */}
         <StatItem
           icon={<Zap size={16} />}
@@ -128,23 +131,53 @@ const LiveTracker: React.FC<LiveTrackerProps> = ({
           loading={loading}
         />
 
-        {/* Golf Days */}
+        {/* S&P 500 */}
         <StatItem
-          icon={<TreePine size={16} />}
-          label="Golf Days"
-          value={golfDays.toString()}
-          subValue="~$142M taxpayer cost"
-          color="text-purple-500"
+          icon={<BarChart3 size={16} />}
+          label="S&P 500 (SPY)"
+          value={sp500 ? `$${sp500.price.toFixed(2)}` : '---'}
+          subValue={formatSP500Change(sp500)}
+          color="text-blue-500"
           loading={loading}
         />
 
-        {/* Truth Social Posts */}
+        {/* Unemployment */}
         <StatItem
-          icon={<MessageCircle size={16} />}
-          label="Truth Social Posts"
-          value={truthPostsCount !== null ? truthPostsCount.toLocaleString() : '---'}
-          subValue={`+${todayPosts} today`}
-          color="text-cyan-500"
+          icon={<Users size={16} />}
+          label="Unemployment"
+          value={unemployment ? `${unemployment.rate}%` : '---'}
+          subValue="U.S. Rate (BLS)"
+          color="text-orange-500"
+          loading={loading}
+        />
+
+        {/* Inflation */}
+        <StatItem
+          icon={<Percent size={16} />}
+          label="Inflation (CPI)"
+          value={inflation ? `${inflation.rate}%` : '---'}
+          subValue="Year-over-year"
+          color="text-red-500"
+          loading={loading}
+        />
+
+        {/* Bitcoin */}
+        <StatItem
+          icon={<Bitcoin size={16} />}
+          label="Bitcoin"
+          value={bitcoin ? `$${bitcoin.price.toLocaleString()}` : '---'}
+          subValue={formatBtcChange(bitcoin)}
+          color="text-amber-500"
+          loading={loading}
+        />
+
+        {/* Gold */}
+        <StatItem
+          icon={<CircleDollarSign size={16} />}
+          label="Gold Price"
+          value={gold ? `$${gold.price.toLocaleString()}` : '---'}
+          subValue="Per ounce"
+          color="text-yellow-400"
           loading={loading}
         />
       </div>

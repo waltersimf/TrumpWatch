@@ -1,4 +1,4 @@
-import { DebtData, QuoteData, GasPriceData, ApprovalData, TruthPost } from '../types';
+import { DebtData, QuoteData, GasPriceData, SP500Data, UnemploymentData, InflationData, BitcoinData, GoldData } from '../types';
 
 // Constants
 const TERM_START_DATE = '2025-01-20';
@@ -6,8 +6,10 @@ const TREASURY_API = 'https://api.fiscaldata.treasury.gov/services/api/fiscal_se
 const FEDERAL_REGISTER_API = 'https://www.federalregister.gov/api/v1/documents.json';
 const QUOTE_API = 'https://api.tronalddump.io';
 const GAS_PRICE_API = 'https://api.eia.gov/v2/petroleum/pri/gnd/data/';
-const VOTEHUB_API = 'https://votehub.com/api/polls';
-const TRUTH_SOCIAL_ARCHIVE = 'https://raw.githubusercontent.com/stiles/trump-truth-social-archive/main/truth_archive.json';
+const YAHOO_FINANCE_API = 'https://query1.finance.yahoo.com/v8/finance/chart/SPY';
+const BLS_API = 'https://api.bls.gov/publicAPI/v2/timeseries/data/';
+const COINGECKO_API = 'https://api.coingecko.com/api/v3/simple/price';
+const METALS_API = 'https://api.metals.dev/v1/latest';
 
 // Fallback quotes if API fails
 const FALLBACK_QUOTES: QuoteData[] = [
@@ -50,11 +52,9 @@ const FALLBACK_QUOTES: QuoteData[] = [
 
 export const fetchNationalDebt = async (): Promise<DebtData> => {
   try {
-    // Fetch latest
     const latestRes = await fetch(`${TREASURY_API}?sort=-record_date&limit=1`);
     const latestJson = await latestRes.json();
 
-    // Fetch baseline (approximate Jan 20, 2025)
     const baselineRes = await fetch(`${TREASURY_API}?filter=record_date:gte:${TERM_START_DATE}&sort=record_date&limit=1`);
     const baselineJson = await baselineRes.json();
 
@@ -88,7 +88,6 @@ export const fetchMultipleQuotes = async (count: number = 7): Promise<QuoteData[
   const quotes: QuoteData[] = [];
 
   try {
-    // Try fetching from the search endpoint for multiple quotes
     const searchRes = await fetch(`${QUOTE_API}/search/quote?query=the&page=0&size=${count}`, {
       headers: { 'Accept': 'application/json' }
     });
@@ -108,7 +107,6 @@ export const fetchMultipleQuotes = async (count: number = 7): Promise<QuoteData[
       }
     }
 
-    // Fallback: Try fetching multiple random quotes
     const promises = Array(count).fill(null).map(() =>
       fetch(`${QUOTE_API}/random/quote`, {
         headers: { 'Accept': 'application/json' }
@@ -135,33 +133,11 @@ export const fetchMultipleQuotes = async (count: number = 7): Promise<QuoteData[
     console.error("Error fetching quotes:", error);
   }
 
-  // Return fallback quotes if API fails
   return FALLBACK_QUOTES;
-};
-
-export const fetchRandomQuote = async (): Promise<QuoteData> => {
-  try {
-    const res = await fetch(`${QUOTE_API}/random/quote`, {
-      headers: { 'Accept': 'application/json' }
-    });
-    if (!res.ok) throw new Error('Quote API failed');
-    const json = await res.json();
-    return {
-      value: json.value,
-      appeared_at: json.appeared_at,
-      source_url: json._embedded?.source?.[0]?.url,
-      source: json._embedded?.source?.[0]?.url ?
-        new URL(json._embedded.source[0].url).hostname.replace('www.', '') : undefined
-    };
-  } catch (error) {
-    console.error("Error fetching quote:", error);
-    return FALLBACK_QUOTES[Math.floor(Math.random() * FALLBACK_QUOTES.length)];
-  }
 };
 
 export const fetchGasPrice = async (): Promise<GasPriceData> => {
   try {
-    // EIA API for regular gasoline prices
     const url = `${GAS_PRICE_API}?api_key=DEMO_KEY&frequency=weekly&data[0]=value&facets[product][]=EPM0&facets[duoarea][]=NUS&sort[0][column]=period&sort[0][direction]=desc&length=52`;
 
     const res = await fetch(url);
@@ -171,7 +147,6 @@ export const fetchGasPrice = async (): Promise<GasPriceData> => {
 
     if (json.response?.data && json.response.data.length > 0) {
       const latestPrice = parseFloat(json.response.data[0]?.value || '0');
-      // Find baseline price from around Jan 20, 2025
       const baselineData = json.response.data.find((d: any) => d.period >= '2025-01-20') || json.response.data[json.response.data.length - 1];
       const baselinePrice = parseFloat(baselineData?.value || latestPrice.toString());
 
@@ -185,7 +160,6 @@ export const fetchGasPrice = async (): Promise<GasPriceData> => {
     throw new Error('No data returned');
   } catch (error) {
     console.error("Error fetching gas price:", error);
-    // Fallback data
     return {
       price: 3.42,
       baseline_price: 3.11,
@@ -194,117 +168,164 @@ export const fetchGasPrice = async (): Promise<GasPriceData> => {
   }
 };
 
-export const fetchApprovalRating = async (): Promise<ApprovalData> => {
+export const fetchSP500 = async (): Promise<SP500Data> => {
   try {
-    const url = `${VOTEHUB_API}?poll_type=approval&subject=donald-trump`;
+    const url = `${YAHOO_FINANCE_API}?interval=1d&range=1d`;
     const res = await fetch(url);
 
-    if (!res.ok) throw new Error('VoteHub API failed');
+    if (!res.ok) throw new Error('Yahoo Finance API failed');
 
     const json = await res.json();
+    const result = json.chart?.result?.[0];
 
-    if (Array.isArray(json) && json.length > 0) {
-      // Get the latest poll (first in array, assuming sorted by date desc)
-      const latestPoll = json[0];
-      const approveAnswer = latestPoll.answers?.find((a: any) =>
-        a.label?.toLowerCase().includes('approve') && !a.label?.toLowerCase().includes('disapprove')
-      );
-      const disapproveAnswer = latestPoll.answers?.find((a: any) =>
-        a.label?.toLowerCase().includes('disapprove')
-      );
-
-      const currentApprove = approveAnswer?.pct || 0;
-
-      // Try to find previous month's poll for comparison
-      let monthChange: number | null = null;
-      if (json.length > 1) {
-        const now = new Date();
-        const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-
-        const previousPoll = json.find((poll: any) => {
-          const pollDate = new Date(poll.end_date || poll.created_at);
-          return pollDate <= oneMonthAgo;
-        });
-
-        if (previousPoll) {
-          const prevApprove = previousPoll.answers?.find((a: any) =>
-            a.label?.toLowerCase().includes('approve') && !a.label?.toLowerCase().includes('disapprove')
-          )?.pct || 0;
-          monthChange = currentApprove - prevApprove;
-        }
-      }
+    if (result) {
+      const meta = result.meta;
+      const price = meta.regularMarketPrice || 0;
+      const previousClose = meta.previousClose || price;
+      const change = price - previousClose;
+      const changePercent = previousClose > 0 ? (change / previousClose) * 100 : 0;
 
       return {
-        approve: currentApprove,
-        disapprove: disapproveAnswer?.pct || 0,
-        monthChange,
-        pollDate: latestPoll.end_date || latestPoll.created_at || new Date().toISOString(),
-        pollster: latestPoll.pollster || latestPoll.source || 'VoteHub'
+        price,
+        change,
+        changePercent
       };
     }
 
-    throw new Error('No approval data returned');
+    throw new Error('No S&P 500 data');
   } catch (error) {
-    console.error("Error fetching approval rating:", error);
-    // Fallback data
+    console.error("Error fetching S&P 500:", error);
     return {
-      approve: 43,
-      disapprove: 53,
-      monthChange: -2,
-      pollDate: new Date().toISOString(),
-      pollster: 'Aggregate'
+      price: 5950,
+      change: 25,
+      changePercent: 0.42
     };
   }
 };
 
-export const fetchTruthPostsCount = async (): Promise<number> => {
+export const fetchUnemployment = async (): Promise<UnemploymentData> => {
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+    const currentYear = new Date().getFullYear();
+    const res = await fetch(`${BLS_API}LNS14000000?startyear=${currentYear - 1}&endyear=${currentYear}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        seriesid: ['LNS14000000'],
+        startyear: (currentYear - 1).toString(),
+        endyear: currentYear.toString()
+      })
+    });
 
-    const res = await fetch(TRUTH_SOCIAL_ARCHIVE, { signal: controller.signal });
-    clearTimeout(timeoutId);
-
-    if (!res.ok) throw new Error('Failed to fetch Truth archive');
+    if (!res.ok) throw new Error('BLS API failed');
 
     const json = await res.json();
+    const series = json.Results?.series?.[0];
 
-    if (Array.isArray(json)) {
-      return json.length;
+    if (series?.data?.length > 0) {
+      const latest = series.data[0];
+      return {
+        rate: parseFloat(latest.value),
+        date: `${latest.year}-${latest.period.replace('M', '')}`
+      };
     }
-    return 0;
+
+    throw new Error('No unemployment data');
   } catch (error) {
-    console.warn("Truth Social count fetch failed:", error);
-    return 1847; // Fallback count
+    console.error("Error fetching unemployment:", error);
+    return {
+      rate: 4.1,
+      date: new Date().toISOString().split('T')[0]
+    };
   }
 };
 
-export const fetchLatestTruth = async (): Promise<TruthPost | null> => {
+export const fetchInflation = async (): Promise<InflationData> => {
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const currentYear = new Date().getFullYear();
+    const res = await fetch(`${BLS_API}CUUR0000SA0?startyear=${currentYear - 2}&endyear=${currentYear}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        seriesid: ['CUUR0000SA0'],
+        startyear: (currentYear - 2).toString(),
+        endyear: currentYear.toString()
+      })
+    });
 
-    const res = await fetch(TRUTH_SOCIAL_ARCHIVE, { signal: controller.signal });
-    clearTimeout(timeoutId);
+    if (!res.ok) throw new Error('BLS API failed');
 
-    if (!res.ok) throw new Error('Failed to fetch Truth archive');
+    const json = await res.json();
+    const series = json.Results?.series?.[0];
+
+    if (series?.data?.length > 12) {
+      const latest = parseFloat(series.data[0].value);
+      const yearAgo = parseFloat(series.data[12].value);
+      const yoyChange = ((latest - yearAgo) / yearAgo) * 100;
+
+      return {
+        rate: parseFloat(yoyChange.toFixed(1)),
+        date: `${series.data[0].year}-${series.data[0].period.replace('M', '')}`
+      };
+    }
+
+    throw new Error('No inflation data');
+  } catch (error) {
+    console.error("Error fetching inflation:", error);
+    return {
+      rate: 2.9,
+      date: new Date().toISOString().split('T')[0]
+    };
+  }
+};
+
+export const fetchBitcoin = async (): Promise<BitcoinData> => {
+  try {
+    const url = `${COINGECKO_API}?ids=bitcoin&vs_currencies=usd&include_24hr_change=true`;
+    const res = await fetch(url);
+
+    if (!res.ok) throw new Error('CoinGecko API failed');
 
     const json = await res.json();
 
-    if (Array.isArray(json) && json.length > 0) {
-      const recent = json.slice(-5).sort((a: any, b: any) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-      return recent[0] as TruthPost;
+    if (json.bitcoin) {
+      return {
+        price: json.bitcoin.usd || 0,
+        change24h: json.bitcoin.usd_24h_change || 0
+      };
     }
-    return null;
+
+    throw new Error('No Bitcoin data');
   } catch (error) {
-    console.warn("Truth Social fetch failed:", error);
+    console.error("Error fetching Bitcoin:", error);
     return {
-      id: "fallback",
-      content: "Latest updates from Truth Social are currently synchronizing. Please check back shortly.",
-      created_at: new Date().toISOString(),
-      stats: { replies_count: 0, reblogs_count: 0, favourites_count: 0 }
+      price: 97500,
+      change24h: 2.5
+    };
+  }
+};
+
+export const fetchGold = async (): Promise<GoldData> => {
+  try {
+    const url = `${METALS_API}?api_key=demo&currency=USD&unit=ounce`;
+    const res = await fetch(url);
+
+    if (!res.ok) throw new Error('Metals API failed');
+
+    const json = await res.json();
+
+    if (json.metals?.gold) {
+      return {
+        price: json.metals.gold,
+        date: json.timestamp || new Date().toISOString()
+      };
+    }
+
+    throw new Error('No Gold data');
+  } catch (error) {
+    console.error("Error fetching Gold:", error);
+    return {
+      price: 2650,
+      date: new Date().toISOString()
     };
   }
 };
