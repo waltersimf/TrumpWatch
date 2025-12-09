@@ -2,10 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+}
+
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #0F172A;
+  background-color: #0f172a;
   color: #F8FAFC;
+  padding-top: var(--safe-area-top);
+  padding-bottom: var(--safe-area-bottom);
+  padding-left: var(--safe-area-left);
+  padding-right: var(--safe-area-right);
+}
+
+.pt-safe {
+  padding-top: max(env(safe-area-inset-top), 12px);
+}
+
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 20px);
 }
 
 .glass-panel {
@@ -15,13 +34,114 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Countdown number animation */
-@keyframes flip {
-  0% { transform: rotateX(0deg); }
-  50% { transform: rotateX(-90deg); }
-  100% { transform: rotateX(0deg); }
+.stat-card {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.2s ease;
 }
 
-.countdown-number {
-  animation: flip 0.3s ease-in-out;
+.stat-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(30, 41, 59, 0.7);
+}
+
+/* Countdown blocks */
+.countdown-block {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(71, 85, 105, 0.5);
+  border-radius: 12px;
+  min-width: 70px;
+  padding: 12px 8px;
+}
+
+@media (min-width: 640px) {
+  .countdown-block {
+    min-width: 100px;
+    padding: 20px 16px;
+  }
+}
+
+/* Progress bar gradient */
+.progress-gradient {
+  background: linear-gradient(90deg, #f97316 0%, #ef4444 100%);
+}
+
+/* Quote carousel */
+.quote-carousel {
+  position: relative;
+  overflow: hidden;
+}
+
+.quote-slide {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(100, 116, 139, 0.5);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.carousel-dot.active {
+  background: #f97316;
+  width: 24px;
+  border-radius: 4px;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 2s ease-in-out infinite;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.5);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.7);
+}
+
+/* Touch gestures */
+.touch-pan-x {
+  touch-action: pan-x;
 }
