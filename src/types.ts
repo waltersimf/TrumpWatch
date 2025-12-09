@@ -17,27 +17,30 @@ export interface GasPriceData {
   date: string;
 }
 
-export interface ApprovalData {
-  approve: number;
-  disapprove: number;
-  monthChange: number | null;
-  pollDate: string;
-  pollster: string;
+export interface SP500Data {
+  price: number;
+  change: number;
+  changePercent: number;
 }
 
-export interface TruthPost {
-  id: string;
-  content: string;
-  created_at: string;
-  stats?: {
-    replies_count: number;
-    reblogs_count: number;
-    favourites_count: number;
-  };
-  media_attachments?: Array<{
-    type: string;
-    url: string;
-  }>;
+export interface UnemploymentData {
+  rate: number;
+  date: string;
+}
+
+export interface InflationData {
+  rate: number;
+  date: string;
+}
+
+export interface BitcoinData {
+  price: number;
+  change24h: number;
+}
+
+export interface GoldData {
+  price: number;
+  date: string;
 }
 
 export interface CountdownTime {
@@ -56,9 +59,11 @@ export interface DashboardState {
   quotes: QuoteData[];
   currentQuoteIndex: number;
   gasPrice: GasPriceData | null;
-  approvalRating: ApprovalData | null;
-  golfDays: number;
-  truthPostsCount: number | null;
+  sp500: SP500Data | null;
+  unemployment: UnemploymentData | null;
+  inflation: InflationData | null;
+  bitcoin: BitcoinData | null;
+  gold: GoldData | null;
   loading: boolean;
   error: string | null;
 }

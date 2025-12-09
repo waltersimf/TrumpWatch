@@ -5,8 +5,11 @@ import {
   fetchExecutiveOrdersCount,
   fetchMultipleQuotes,
   fetchGasPrice,
-  fetchApprovalRating,
-  fetchTruthPostsCount
+  fetchSP500,
+  fetchUnemployment,
+  fetchInflation,
+  fetchBitcoin,
+  fetchGold
 } from './services/api';
 import Countdown from './components/Countdown';
 import QuoteCarousel from './components/QuoteCarousel';
@@ -21,9 +24,11 @@ const App: React.FC = () => {
     quotes: [],
     currentQuoteIndex: 0,
     gasPrice: null,
-    approvalRating: null,
-    golfDays: 89, // Hardcoded
-    truthPostsCount: null,
+    sp500: null,
+    unemployment: null,
+    inflation: null,
+    bitcoin: null,
+    gold: null,
     loading: true,
     error: null
   });
@@ -31,13 +36,16 @@ const App: React.FC = () => {
   const loadData = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const [debtData, eoData, quotesData, gasPriceData, approvalData, truthCount] = await Promise.all([
+      const [debtData, eoData, quotesData, gasPriceData, sp500Data, unemploymentData, inflationData, bitcoinData, goldData] = await Promise.all([
         fetchNationalDebt(),
         fetchExecutiveOrdersCount(),
         fetchMultipleQuotes(7),
         fetchGasPrice(),
-        fetchApprovalRating(),
-        fetchTruthPostsCount()
+        fetchSP500(),
+        fetchUnemployment(),
+        fetchInflation(),
+        fetchBitcoin(),
+        fetchGold()
       ]);
 
       setState(prev => ({
@@ -46,8 +54,11 @@ const App: React.FC = () => {
         eoCount: eoData,
         quotes: quotesData,
         gasPrice: gasPriceData,
-        approvalRating: approvalData,
-        truthPostsCount: truthCount,
+        sp500: sp500Data,
+        unemployment: unemploymentData,
+        inflation: inflationData,
+        bitcoin: bitcoinData,
+        gold: goldData,
         loading: false,
         error: null
       }));
@@ -72,7 +83,7 @@ const App: React.FC = () => {
   const handleShare = async () => {
     const shareData = {
       title: 'TrumpWatch',
-      text: `Tracking Trump's presidency - Day ${state.debt ? '...' : ''} | National Debt: $${state.debt ? (state.debt.total_debt / 1e12).toFixed(1) : '?'}T`,
+      text: `Tracking Trump's presidency | National Debt: $${state.debt ? (state.debt.total_debt / 1e12).toFixed(1) : '?'}T`,
       url: window.location.href,
     };
 
@@ -162,10 +173,12 @@ const App: React.FC = () => {
           <LiveTracker
             debt={state.debt}
             gasPrice={state.gasPrice}
-            approvalRating={state.approvalRating}
             eoCount={state.eoCount}
-            golfDays={state.golfDays}
-            truthPostsCount={state.truthPostsCount}
+            sp500={state.sp500}
+            unemployment={state.unemployment}
+            inflation={state.inflation}
+            bitcoin={state.bitcoin}
+            gold={state.gold}
             loading={state.loading}
           />
         </section>
