@@ -14,8 +14,9 @@ import {
 import Countdown from './components/Countdown';
 import QuoteCarousel from './components/QuoteCarousel';
 import LiveTracker from './components/LiveTracker';
-import NotificationBanner from './components/NotificationBanner';
-import { Bell, Share2, AlertTriangle } from 'lucide-react';
+import { Share2, AlertTriangle } from 'lucide-react';
+
+// Прибрали імпорт NotificationBanner та Bell
 
 const App: React.FC = () => {
   const [state, setState] = useState<DashboardState>({
@@ -30,13 +31,14 @@ const App: React.FC = () => {
     bitcoin: null,
     gold: null,
     loading: true,
-    error: null
+    error: null,
+    latestPost: null
   });
 
   const loadData = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const [debtData, eoData, quotesData, gasPriceData, sp500Data, unemploymentData, inflationData, bitcoinData, goldData] = await Promise.all([
+      const results = await Promise.all([
         fetchNationalDebt(),
         fetchExecutiveOrdersCount(),
         fetchMultipleQuotes(7),
@@ -47,6 +49,18 @@ const App: React.FC = () => {
         fetchBitcoin(),
         fetchGold()
       ]);
+
+      const [
+        debtData, 
+        eoData, 
+        quotesData, 
+        gasPriceData, 
+        sp500Data, 
+        unemploymentData, 
+        inflationData, 
+        bitcoinData, 
+        goldData
+      ] = results;
 
       setState(prev => ({
         ...prev,
@@ -99,18 +113,6 @@ const App: React.FC = () => {
     }
   };
 
-  const handleEnableNotifications = async () => {
-    if ('Notification' in window) {
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        new Notification('TrumpWatch', {
-          body: 'You will now receive daily updates!',
-          icon: '/favicon.ico'
-        });
-      }
-    }
-  };
-
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 selection:bg-red-500/30">
       {/* Header with safe area */}
@@ -125,13 +127,7 @@ const App: React.FC = () => {
             </h1>
           </div>
           <div className="flex items-center gap-1">
-            <button
-              onClick={handleEnableNotifications}
-              className="p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-full transition-colors"
-              title="Notifications"
-            >
-              <Bell size={20} />
-            </button>
+            {/* Notification Button Removed */}
             <button
               onClick={handleShare}
               className="p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-full transition-colors"
@@ -183,8 +179,7 @@ const App: React.FC = () => {
           />
         </section>
 
-        {/* Notification Banner */}
-        <NotificationBanner onEnable={handleEnableNotifications} />
+        {/* Notification Banner Removed */}
       </main>
     </div>
   );

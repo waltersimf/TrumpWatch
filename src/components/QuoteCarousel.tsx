@@ -62,15 +62,16 @@ const QuoteCarousel: React.FC<QuoteCarouselProps> = ({
 
   const currentQuote = quotes[currentIndex];
 
+  // ВИПРАВЛЕНО: функція тепер безпечно форматує джерело або дату
   const formatSource = (quote: QuoteData): string => {
     if (quote.source_url) {
         try {
             return new URL(quote.source_url).hostname.replace('www.', '');
         } catch {
-            // ignore error
+            // Якщо URL некоректний, ігноруємо
         }
     }
-
+    
     if (quote.appeared_at) {
       const date = new Date(quote.appeared_at);
       return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
