@@ -106,18 +106,24 @@ object WidgetUtils {
                 e.printStackTrace()
             }
 
-            // Fetch S&P 500
+            // Fetch S&P 500 via FRED API
             try {
-                val sp500Url = URL("https://query1.finance.yahoo.com/v8/finance/chart/SPY?interval=1d&range=1d")
+                val sp500Url = URL("https://api.stlouisfed.org/fred/series/observations?series_id=SP500&api_key=82376aa22a515252bb9e18ddd772b3e0&file_type=json&limit=2&sort_order=desc")
                 val sp500Conn = sp500Url.openConnection() as HttpURLConnection
                 sp500Conn.connectTimeout = 5000
                 sp500Conn.readTimeout = 5000
                 val sp500Response = sp500Conn.inputStream.bufferedReader().readText()
                 val sp500Json = JSONObject(sp500Response)
-                val meta = sp500Json.getJSONObject("chart").getJSONArray("result").getJSONObject(0).getJSONObject("meta")
-                sp500 = meta.getDouble("regularMarketPrice")
-                val prevClose = meta.getDouble("previousClose")
-                sp500Change = if (prevClose > 0) ((sp500!! - prevClose) / prevClose) * 100 else 0.0
+                val observations = sp500Json.getJSONArray("observations")
+                if (observations.length() >= 1) {
+                    sp500 = observations.getJSONObject(0).getString("value").toDoubleOrNull()
+                    if (observations.length() >= 2 && sp500 != null) {
+                        val prevValue = observations.getJSONObject(1).getString("value").toDoubleOrNull()
+                        if (prevValue != null && prevValue > 0) {
+                            sp500Change = ((sp500!! - prevValue) / prevValue) * 100
+                        }
+                    }
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
