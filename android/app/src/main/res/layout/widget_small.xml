@@ -4,37 +4,40 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
-    android:padding="12dp">
+    android:padding="8dp">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical">
 
-        <!-- TrumpWatch Title -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TW"
+            android:text="TRUMP TERM"
             android:textColor="#EF4444"
-            android:textSize="14sp"
+            android:textSize="10sp"
             android:textStyle="bold"
-            android:layout_marginEnd="8dp" />
+            android:letterSpacing="0.05"
+            android:layout_marginBottom="4dp"/>
 
-        <!-- Day Counter -->
         <TextView
             android:id="@+id/widget_day_text"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Day 323 of 1,461"
+            android:text="Day 1"
             android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:singleLine="true"
-            android:ellipsize="end" />
+            android:textSize="16sp"
+            android:textStyle="bold"/>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="of 1,461"
+            android:textColor="#94A3B8"
+            android:textSize="11sp"/>
     </LinearLayout>
 
 </RelativeLayout>
