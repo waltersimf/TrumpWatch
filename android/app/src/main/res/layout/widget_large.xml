@@ -7,7 +7,6 @@
     android:orientation="vertical"
     android:padding="12dp">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,7 +42,6 @@
 
     </LinearLayout>
 
-    <!-- Countdown -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -51,7 +49,6 @@
         android:gravity="center"
         android:layout_marginBottom="6dp">
 
-        <!-- Days -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -89,7 +86,6 @@
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp" />
 
-        <!-- Hours -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -127,7 +123,6 @@
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp" />
 
-        <!-- Minutes -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -165,7 +160,6 @@
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp" />
 
-        <!-- Seconds -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -196,7 +190,6 @@
 
     </LinearLayout>
 
-    <!-- Progress Bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -223,13 +216,11 @@
 
     </LinearLayout>
 
-    <!-- Stats Grid -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <!-- National Debt -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -265,7 +256,6 @@
 
         </LinearLayout>
 
-        <!-- S&P 500 -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -302,7 +292,6 @@
 
         </LinearLayout>
 
-        <!-- Bitcoin -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"

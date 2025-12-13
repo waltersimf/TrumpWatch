@@ -88,7 +88,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="S&amp;P 500" 
+                android:text="S&amp;P 500"
                 android:textColor="#CBD5E1"
                 android:textSize="12sp" />
             <TextView
