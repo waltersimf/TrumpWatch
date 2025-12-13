@@ -62,8 +62,16 @@ const QuoteCarousel: React.FC<QuoteCarouselProps> = ({
 
   const currentQuote = quotes[currentIndex];
 
+  // ВИПРАВЛЕНО: функція тепер безпечно форматує джерело або дату
   const formatSource = (quote: QuoteData): string => {
-    if (quote.source) return quote.source;
+    if (quote.source_url) {
+        try {
+            return new URL(quote.source_url).hostname.replace('www.', '');
+        } catch {
+            // Якщо URL некоректний, ігноруємо
+        }
+    }
+    
     if (quote.appeared_at) {
       const date = new Date(quote.appeared_at);
       return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -73,13 +81,11 @@ const QuoteCarousel: React.FC<QuoteCarouselProps> = ({
 
   return (
     <div className="glass-panel rounded-xl p-5 sm:p-6">
-      {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <MessageCircle size={16} className="text-orange-500" />
         <span className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Daily Quote</span>
       </div>
 
-      {/* Quote content */}
       <div
         ref={containerRef}
         className="quote-carousel touch-pan-x min-h-[120px]"
@@ -95,11 +101,11 @@ const QuoteCarousel: React.FC<QuoteCarouselProps> = ({
           </div>
         ) : currentQuote ? (
           <div className="quote-slide">
-            <blockquote className="text-lg sm:text-xl text-slate-200 leading-relaxed mb-4">
+            <blockquote className="text-lg sm:text-xl text-slate-200 leading-relaxed mb-4 italic">
               "{currentQuote.value}"
             </blockquote>
-            <p className="text-slate-500 text-sm">
-              — {formatSource(currentQuote)}
+            <p className="text-slate-500 text-sm font-medium">
+              — Donald J. Trump, <span className="text-slate-600 font-normal">{formatSource(currentQuote)}</span>
             </p>
           </div>
         ) : (
@@ -107,14 +113,15 @@ const QuoteCarousel: React.FC<QuoteCarouselProps> = ({
         )}
       </div>
 
-      {/* Carousel dots */}
       {quotes.length > 1 && (
         <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-slate-700/50">
           {quotes.map((_, index) => (
             <button
               key={index}
               onClick={() => onIndexChange(index)}
-              className={`carousel-dot ${index === currentIndex ? 'active' : ''}`}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                index === currentIndex ? 'bg-orange-500 w-4' : 'bg-slate-600 hover:bg-slate-500'
+              }`}
               aria-label={`Go to quote ${index + 1}`}
             />
           ))}

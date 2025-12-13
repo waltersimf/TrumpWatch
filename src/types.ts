@@ -7,7 +7,7 @@ export interface DebtData {
 export interface QuoteData {
   value: string;
   appeared_at: string;
-  source_url?: string;
+  source_url?: string; // Важливо: тут source_url, а не source
 }
 
 export interface TruthPost {
@@ -46,22 +46,22 @@ export interface BitcoinData {
 export interface GoldData {
   value: number;
   change: number;
-  changePercent?: number; // Додано як необов'язкове
+  changePercent?: number;
 }
 
 export interface UnemploymentData {
   value: number;
-  change?: number; // Зроблено необов'язковим
+  change?: number;
 }
 
 export interface InflationData {
   value: number;
-  change?: number; // Зроблено необов'язковим
+  change?: number;
 }
 
 export interface DashboardState {
   debt: DebtData | null;
-  gasPrice: GasData | null; // ВИПРАВЛЕНО: тепер gasPrice
+  gasPrice: GasData | null;
   eoCount: number | null;
   sp500: SP500Data | null;
   bitcoin: BitcoinData | null;
@@ -69,7 +69,7 @@ export interface DashboardState {
   unemployment: UnemploymentData | null;
   inflation: InflationData | null;
   quotes: QuoteData[];
-  currentQuoteIndex: number; 
+  currentQuoteIndex: number;
   latestPost?: TruthPost | null;
   loading: boolean;
   error: string | null;
