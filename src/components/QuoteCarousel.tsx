@@ -88,7 +88,7 @@ const QuoteCarousel: React.FC<QuoteCarouselProps> = ({
 
       <div
         ref={containerRef}
-        className="quote-carousel touch-pan-x min-h-[120px]"
+        className="quote-carousel touch-pan-y min-h-[120px] select-none"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
