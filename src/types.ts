@@ -25,16 +25,6 @@ export interface TruthPost {
   }>;
 }
 
-export interface CountdownTime {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-  totalDaysInTerm: number;
-  daysPassed: number;
-  percentageComplete: number;
-}
-
 export interface GasData {
   current_price: number;
   baseline_price: number;
@@ -56,21 +46,22 @@ export interface BitcoinData {
 export interface GoldData {
   value: number;
   change: number;
+  changePercent?: number; // Додано як необов'язкове
 }
 
 export interface UnemploymentData {
   value: number;
-  change: number;
+  change?: number; // Зроблено необов'язковим
 }
 
 export interface InflationData {
   value: number;
-  change: number;
+  change?: number; // Зроблено необов'язковим
 }
 
 export interface DashboardState {
   debt: DebtData | null;
-  gas: GasData | null;
+  gasPrice: GasData | null; // ВИПРАВЛЕНО: тепер gasPrice
   eoCount: number | null;
   sp500: SP500Data | null;
   bitcoin: BitcoinData | null;
@@ -78,7 +69,8 @@ export interface DashboardState {
   unemployment: UnemploymentData | null;
   inflation: InflationData | null;
   quotes: QuoteData[];
-  latestPost: TruthPost | null;
+  currentQuoteIndex: number; 
+  latestPost?: TruthPost | null;
   loading: boolean;
   error: string | null;
 }

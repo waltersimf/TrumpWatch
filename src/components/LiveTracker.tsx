@@ -1,10 +1,10 @@
 import React from 'react';
 import { DollarSign, TrendingUp, Zap, BarChart3, Users, Percent, Bitcoin, CircleDollarSign } from 'lucide-react';
-import { DebtData, GasPriceData, SP500Data, UnemploymentData, InflationData, BitcoinData, GoldData } from '../types';
+import { DebtData, GasData, SP500Data, UnemploymentData, InflationData, BitcoinData, GoldData } from '../types';
 
 interface LiveTrackerProps {
   debt: DebtData | null;
-  gasPrice: GasPriceData | null;
+  gasPrice: GasData | null;
   eoCount: number | null;
   sp500: SP500Data | null;
   unemployment: UnemploymentData | null;
@@ -71,7 +71,7 @@ const LiveTracker: React.FC<LiveTrackerProps> = ({
   };
 
   // Format gas price change
-  const gasPriceChange = gasPrice ? gasPrice.price - gasPrice.baseline_price : 0;
+  const gasPriceChange = gasPrice ? gasPrice.current_price - gasPrice.baseline_price : 0;
   const formatGasChange = (val: number): string => {
     const prefix = val >= 0 ? '+' : '';
     return `${prefix}$${val.toFixed(2)} since Jan 20`;
@@ -87,8 +87,9 @@ const LiveTracker: React.FC<LiveTrackerProps> = ({
   // Format Bitcoin change
   const formatBtcChange = (data: BitcoinData | null): string => {
     if (!data) return 'Loading...';
-    const prefix = data.change24h >= 0 ? '+' : '';
-    return `${prefix}${data.change24h.toFixed(1)}% 24h`;
+    // ВИПРАВЛЕНО: тут також має бути changePercent
+    const prefix = data.changePercent >= 0 ? '+' : '';
+    return `${prefix}${data.changePercent.toFixed(1)}% 24h`; 
   };
 
   return (
@@ -115,7 +116,7 @@ const LiveTracker: React.FC<LiveTrackerProps> = ({
         <StatItem
           icon={<TrendingUp size={16} />}
           label="Gas Price (Avg)"
-          value={gasPrice ? `$${gasPrice.price.toFixed(2)}` : '---'}
+          value={gasPrice ? `$${gasPrice.current_price.toFixed(2)}` : '---'}
           subValue={gasPrice ? formatGasChange(gasPriceChange) : 'Loading...'}
           color="text-green-500"
           loading={loading}
@@ -135,7 +136,7 @@ const LiveTracker: React.FC<LiveTrackerProps> = ({
         <StatItem
           icon={<BarChart3 size={16} />}
           label="S&P 500 (SPY)"
-          value={sp500 ? `$${sp500.price.toFixed(2)}` : '---'}
+          value={sp500 ? `$${sp500.value.toFixed(2)}` : '---'}
           subValue={formatSP500Change(sp500)}
           color="text-blue-500"
           loading={loading}
@@ -145,7 +146,7 @@ const LiveTracker: React.FC<LiveTrackerProps> = ({
         <StatItem
           icon={<Users size={16} />}
           label="Unemployment"
-          value={unemployment ? `${unemployment.rate}%` : '---'}
+          value={unemployment ? `${unemployment.value}%` : '---'}
           subValue="U.S. Rate (BLS)"
           color="text-orange-500"
           loading={loading}
@@ -155,7 +156,7 @@ const LiveTracker: React.FC<LiveTrackerProps> = ({
         <StatItem
           icon={<Percent size={16} />}
           label="Inflation (CPI)"
-          value={inflation ? `${inflation.rate}%` : '---'}
+          value={inflation ? `${inflation.value}%` : '---'}
           subValue="Year-over-year"
           color="text-red-500"
           loading={loading}
@@ -165,8 +166,8 @@ const LiveTracker: React.FC<LiveTrackerProps> = ({
         <StatItem
           icon={<Bitcoin size={16} />}
           label="Bitcoin"
-          value={bitcoin ? `$${bitcoin.price.toLocaleString()}` : '---'}
-          subValue={formatBtcChange(bitcoin)}
+          value={bitcoin ? `$${bitcoin.value.toLocaleString()}` : '---'}
+          subValue={bitcoin ? formatBtcChange(bitcoin) : 'Loading...'}
           color="text-amber-500"
           loading={loading}
         />
@@ -175,7 +176,7 @@ const LiveTracker: React.FC<LiveTrackerProps> = ({
         <StatItem
           icon={<CircleDollarSign size={16} />}
           label="Gold Price"
-          value={gold ? `$${gold.price.toLocaleString()}` : '---'}
+          value={gold ? `$${gold.value.toLocaleString()}` : '---'}
           subValue="Per ounce"
           color="text-yellow-400"
           loading={loading}

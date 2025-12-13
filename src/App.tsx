@@ -18,25 +18,28 @@ import NotificationBanner from './components/NotificationBanner';
 import { Bell, Share2, AlertTriangle } from 'lucide-react';
 
 const App: React.FC = () => {
+  // Тепер початковий стан повністю відповідає інтерфейсу DashboardState
   const [state, setState] = useState<DashboardState>({
     debt: null,
     eoCount: null,
     quotes: [],
     currentQuoteIndex: 0,
-    gasPrice: null,
+    gasPrice: null, // Тепер це відповідає типу
     sp500: null,
     unemployment: null,
     inflation: null,
     bitcoin: null,
     gold: null,
     loading: true,
-    error: null
+    error: null,
+    latestPost: null // Додано для сумісності з типами
   });
 
   const loadData = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const [debtData, eoData, quotesData, gasPriceData, sp500Data, unemploymentData, inflationData, bitcoinData, goldData] = await Promise.all([
+      // Використовуємо Promise.all для паралельного завантаження
+      const results = await Promise.all([
         fetchNationalDebt(),
         fetchExecutiveOrdersCount(),
         fetchMultipleQuotes(7),
@@ -47,6 +50,19 @@ const App: React.FC = () => {
         fetchBitcoin(),
         fetchGold()
       ]);
+
+      // Деструктуризація результатів
+      const [
+        debtData, 
+        eoData, 
+        quotesData, 
+        gasPriceData, 
+        sp500Data, 
+        unemploymentData, 
+        inflationData, 
+        bitcoinData, 
+        goldData
+      ] = results;
 
       setState(prev => ({
         ...prev,
