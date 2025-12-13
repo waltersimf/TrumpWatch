@@ -4,4 +4,14 @@
     <string name="title_activity_main">TrumpWatch</string>
     <string name="package_name">com.trumpwatch.app</string>
     <string name="custom_url_scheme">com.trumpwatch.app</string>
+
+    <!-- Widget descriptions -->
+    <string name="widget_small_description">Day counter showing current day of Trump\'s term</string>
+    <string name="widget_medium_description">Countdown timer with National Debt and S&amp;P 500</string>
+    <string name="widget_large_description">Full dashboard with countdown, progress bar, and market stats</string>
+
+    <!-- Widget names -->
+    <string name="widget_small_name">Day Counter</string>
+    <string name="widget_medium_name">Countdown</string>
+    <string name="widget_large_name">Dashboard</string>
 </resources>

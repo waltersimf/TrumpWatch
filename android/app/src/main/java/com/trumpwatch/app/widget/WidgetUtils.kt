@@ -1,0 +1,184 @@
+package com.trumpwatch.app.widget
+
+import android.content.Context
+import android.os.Handler
+import android.os.Looper
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
+import java.text.NumberFormat
+import java.util.*
+import java.util.concurrent.Executors
+
+object WidgetUtils {
+
+    private val executor = Executors.newSingleThreadExecutor()
+    private val handler = Handler(Looper.getMainLooper())
+
+    // Term dates
+    private val TERM_START = Calendar.getInstance().apply {
+        set(2025, Calendar.JANUARY, 20, 12, 0, 0)
+        set(Calendar.MILLISECOND, 0)
+    }.timeInMillis
+
+    private val TERM_END = Calendar.getInstance().apply {
+        set(2029, Calendar.JANUARY, 20, 12, 0, 0)
+        set(Calendar.MILLISECOND, 0)
+    }.timeInMillis
+
+    private const val TOTAL_DAYS = 1461L
+
+    data class CountdownData(
+        val days: Long,
+        val hours: Long,
+        val minutes: Long,
+        val seconds: Long,
+        val daysPassed: Int,
+        val totalDays: Int,
+        val percentComplete: Double
+    )
+
+    data class MarketData(
+        val nationalDebt: Double?,
+        val debtChange: Double?,
+        val sp500Price: Double?,
+        val sp500ChangePercent: Double?,
+        val bitcoinPrice: Double?,
+        val bitcoinChangePercent: Double?
+    )
+
+    fun calculateCountdown(): CountdownData {
+        val now = System.currentTimeMillis()
+        val timeRemaining = TERM_END - now
+        val timePassed = now - TERM_START
+
+        if (timeRemaining <= 0) {
+            return CountdownData(0, 0, 0, 0, TOTAL_DAYS.toInt(), TOTAL_DAYS.toInt(), 100.0)
+        }
+
+        val days = timeRemaining / (1000 * 60 * 60 * 24)
+        val hours = (timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        val minutes = (timeRemaining % (1000 * 60 * 60)) / (1000 * 60)
+        val seconds = (timeRemaining % (1000 * 60)) / 1000
+
+        val daysPassedRaw = (timePassed / (1000 * 60 * 60 * 24)).coerceIn(0, TOTAL_DAYS)
+        val percentComplete = ((timePassed.toDouble() / (TERM_END - TERM_START)) * 100).coerceIn(0.0, 100.0)
+
+        return CountdownData(
+            days = days,
+            hours = hours,
+            minutes = minutes,
+            seconds = seconds,
+            daysPassed = (daysPassedRaw + 1).toInt(),
+            totalDays = TOTAL_DAYS.toInt(),
+            percentComplete = percentComplete
+        )
+    }
+
+    fun fetchMarketData(callback: (MarketData) -> Unit) {
+        executor.execute {
+            var debt: Double? = null
+            var debtBaseline: Double? = null
+            var sp500: Double? = null
+            var sp500Change: Double? = null
+            var btc: Double? = null
+            var btcChange: Double? = null
+
+            // Fetch National Debt
+            try {
+                val debtUrl = URL("https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v2/accounting/od/debt_to_penny?sort=-record_date&limit=1")
+                val debtConn = debtUrl.openConnection() as HttpURLConnection
+                debtConn.connectTimeout = 5000
+                debtConn.readTimeout = 5000
+                val debtResponse = debtConn.inputStream.bufferedReader().readText()
+                val debtJson = JSONObject(debtResponse)
+                debt = debtJson.getJSONArray("data").getJSONObject(0).getString("tot_pub_debt_out_amt").toDoubleOrNull()
+
+                // Get baseline
+                val baselineUrl = URL("https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v2/accounting/od/debt_to_penny?filter=record_date:gte:2025-01-20&sort=record_date&limit=1")
+                val baselineConn = baselineUrl.openConnection() as HttpURLConnection
+                baselineConn.connectTimeout = 5000
+                baselineConn.readTimeout = 5000
+                val baselineResponse = baselineConn.inputStream.bufferedReader().readText()
+                val baselineJson = JSONObject(baselineResponse)
+                debtBaseline = baselineJson.getJSONArray("data").getJSONObject(0).getString("tot_pub_debt_out_amt").toDoubleOrNull()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            // Fetch S&P 500
+            try {
+                val sp500Url = URL("https://query1.finance.yahoo.com/v8/finance/chart/SPY?interval=1d&range=1d")
+                val sp500Conn = sp500Url.openConnection() as HttpURLConnection
+                sp500Conn.connectTimeout = 5000
+                sp500Conn.readTimeout = 5000
+                val sp500Response = sp500Conn.inputStream.bufferedReader().readText()
+                val sp500Json = JSONObject(sp500Response)
+                val meta = sp500Json.getJSONObject("chart").getJSONArray("result").getJSONObject(0).getJSONObject("meta")
+                sp500 = meta.getDouble("regularMarketPrice")
+                val prevClose = meta.getDouble("previousClose")
+                sp500Change = if (prevClose > 0) ((sp500!! - prevClose) / prevClose) * 100 else 0.0
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            // Fetch Bitcoin
+            try {
+                val btcUrl = URL("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true")
+                val btcConn = btcUrl.openConnection() as HttpURLConnection
+                btcConn.connectTimeout = 5000
+                btcConn.readTimeout = 5000
+                val btcResponse = btcConn.inputStream.bufferedReader().readText()
+                val btcJson = JSONObject(btcResponse).getJSONObject("bitcoin")
+                btc = btcJson.getDouble("usd")
+                btcChange = btcJson.getDouble("usd_24h_change")
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            val debtChange = if (debt != null && debtBaseline != null) debt - debtBaseline else null
+
+            handler.post {
+                callback(MarketData(debt, debtChange, sp500, sp500Change, btc, btcChange))
+            }
+        }
+    }
+
+    fun formatDebt(debt: Double?): String {
+        if (debt == null) return "---"
+        val trillions = debt / 1_000_000_000_000.0
+        return "$${String.format("%.1f", trillions)}T"
+    }
+
+    fun formatDebtChange(change: Double?): String {
+        if (change == null) return ""
+        val trillions = change / 1_000_000_000_000.0
+        val prefix = if (trillions >= 0) "+" else ""
+        return "$prefix$${String.format("%.1f", trillions)}T since Jan 20"
+    }
+
+    fun formatPrice(price: Double?): String {
+        if (price == null) return "---"
+        return "$${String.format("%.2f", price)}"
+    }
+
+    fun formatBtcPrice(price: Double?): String {
+        if (price == null) return "---"
+        val formatter = NumberFormat.getNumberInstance(Locale.US)
+        return "$${formatter.format(price.toLong())}"
+    }
+
+    fun formatPercent(percent: Double?, suffix: String = "today"): String {
+        if (percent == null) return ""
+        val prefix = if (percent >= 0) "+" else ""
+        return "$prefix${String.format("%.2f", percent)}% $suffix"
+    }
+
+    fun formatBtcPercent(percent: Double?): String {
+        if (percent == null) return ""
+        val prefix = if (percent >= 0) "+" else ""
+        return "$prefix${String.format("%.1f", percent)}% 24h"
+    }
+
+    fun isPositive(value: Double?): Boolean = (value ?: 0.0) >= 0
+}
