@@ -6,8 +6,8 @@ const TREASURY_API = 'https://api.fiscaldata.treasury.gov/services/api/fiscal_se
 const FEDERAL_REGISTER_API = 'https://www.federalregister.gov/api/v1/documents.json';
 const QUOTE_API = 'https://api.tronalddump.io';
 const GAS_PRICE_API = 'https://api.eia.gov/v2/petroleum/pri/gnd/data/';
-const YAHOO_FINANCE_API = 'https://query1.finance.yahoo.com/v8/finance/chart/SPY';
-const BLS_API = 'https://api.bls.gov/publicAPI/v2/timeseries/data/';
+const FRED_API = 'https://api.stlouisfed.org/fred/series/observations';
+const FRED_API_KEY = '82376aa22a515252bb9e18ddd772b3e0';
 const COINGECKO_API = 'https://api.coingecko.com/api/v3/simple/price';
 const METALS_API = 'https://api.metals.dev/v1/latest';
 
@@ -147,12 +147,10 @@ export const fetchGasPrice = async (): Promise<GasPriceData> => {
 
     if (json.response?.data && json.response.data.length > 0) {
       const latestPrice = parseFloat(json.response.data[0]?.value || '0');
-      const baselineData = json.response.data.find((d: any) => d.period >= '2025-01-20') || json.response.data[json.response.data.length - 1];
-      const baselinePrice = parseFloat(baselineData?.value || latestPrice.toString());
 
       return {
         price: latestPrice,
-        baseline_price: baselinePrice,
+        baseline_price: 3.08, // Fixed baseline for Jan 20, 2025
         date: json.response.data[0]?.period
       };
     }
@@ -162,117 +160,106 @@ export const fetchGasPrice = async (): Promise<GasPriceData> => {
     console.error("Error fetching gas price:", error);
     return {
       price: 3.42,
-      baseline_price: 3.11,
+      baseline_price: 3.08,
       date: new Date().toISOString().split('T')[0]
     };
   }
 };
 
+// S&P 500 via FRED API
 export const fetchSP500 = async (): Promise<SP500Data> => {
   try {
-    const url = `${YAHOO_FINANCE_API}?interval=1d&range=1d`;
+    // Get latest 2 observations to calculate change
+    const url = `${FRED_API}?series_id=SP500&api_key=${FRED_API_KEY}&file_type=json&limit=2&sort_order=desc`;
     const res = await fetch(url);
 
-    if (!res.ok) throw new Error('Yahoo Finance API failed');
+    if (!res.ok) throw new Error('FRED API failed');
 
     const json = await res.json();
-    const result = json.chart?.result?.[0];
+    const observations = json.observations;
 
-    if (result) {
-      const meta = result.meta;
-      const price = meta.regularMarketPrice || 0;
-      const previousClose = meta.previousClose || price;
-      const change = price - previousClose;
-      const changePercent = previousClose > 0 ? (change / previousClose) * 100 : 0;
+    if (observations && observations.length >= 1) {
+      const latestValue = parseFloat(observations[0].value);
+      const previousValue = observations.length >= 2 ? parseFloat(observations[1].value) : latestValue;
+
+      const change = latestValue - previousValue;
+      const changePercent = previousValue > 0 ? (change / previousValue) * 100 : 0;
 
       return {
-        price,
-        change,
-        changePercent
+        price: latestValue,
+        change: change,
+        changePercent: changePercent
       };
     }
 
-    throw new Error('No S&P 500 data');
+    throw new Error('No S&P 500 data from FRED');
   } catch (error) {
     console.error("Error fetching S&P 500:", error);
     return {
-      price: 5950,
-      change: 25,
-      changePercent: 0.42
+      price: 6051,
+      change: 15,
+      changePercent: 0.25
     };
   }
 };
 
+// Unemployment via FRED API
 export const fetchUnemployment = async (): Promise<UnemploymentData> => {
   try {
-    const currentYear = new Date().getFullYear();
-    const res = await fetch(`${BLS_API}LNS14000000?startyear=${currentYear - 1}&endyear=${currentYear}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        seriesid: ['LNS14000000'],
-        startyear: (currentYear - 1).toString(),
-        endyear: currentYear.toString()
-      })
-    });
+    const url = `${FRED_API}?series_id=UNRATE&api_key=${FRED_API_KEY}&file_type=json&limit=1&sort_order=desc`;
+    const res = await fetch(url);
 
-    if (!res.ok) throw new Error('BLS API failed');
+    if (!res.ok) throw new Error('FRED API failed');
 
     const json = await res.json();
-    const series = json.Results?.series?.[0];
+    const observations = json.observations;
 
-    if (series?.data?.length > 0) {
-      const latest = series.data[0];
+    if (observations && observations.length > 0) {
       return {
-        rate: parseFloat(latest.value),
-        date: `${latest.year}-${latest.period.replace('M', '')}`
+        rate: parseFloat(observations[0].value),
+        date: observations[0].date
       };
     }
 
-    throw new Error('No unemployment data');
+    throw new Error('No unemployment data from FRED');
   } catch (error) {
     console.error("Error fetching unemployment:", error);
     return {
-      rate: 4.1,
+      rate: 4.2,
       date: new Date().toISOString().split('T')[0]
     };
   }
 };
 
+// Inflation (CPI) via FRED API - calculate Year-over-Year
 export const fetchInflation = async (): Promise<InflationData> => {
   try {
-    const currentYear = new Date().getFullYear();
-    const res = await fetch(`${BLS_API}CUUR0000SA0?startyear=${currentYear - 2}&endyear=${currentYear}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        seriesid: ['CUUR0000SA0'],
-        startyear: (currentYear - 2).toString(),
-        endyear: currentYear.toString()
-      })
-    });
+    // Get 13 months of data to calculate YoY
+    const url = `${FRED_API}?series_id=CPIAUCSL&api_key=${FRED_API_KEY}&file_type=json&limit=13&sort_order=desc`;
+    const res = await fetch(url);
 
-    if (!res.ok) throw new Error('BLS API failed');
+    if (!res.ok) throw new Error('FRED API failed');
 
     const json = await res.json();
-    const series = json.Results?.series?.[0];
+    const observations = json.observations;
 
-    if (series?.data?.length > 12) {
-      const latest = parseFloat(series.data[0].value);
-      const yearAgo = parseFloat(series.data[12].value);
-      const yoyChange = ((latest - yearAgo) / yearAgo) * 100;
+    if (observations && observations.length >= 13) {
+      const latestCPI = parseFloat(observations[0].value);
+      const yearAgoCPI = parseFloat(observations[12].value);
+
+      const yoyChange = ((latestCPI - yearAgoCPI) / yearAgoCPI) * 100;
 
       return {
         rate: parseFloat(yoyChange.toFixed(1)),
-        date: `${series.data[0].year}-${series.data[0].period.replace('M', '')}`
+        date: observations[0].date
       };
     }
 
-    throw new Error('No inflation data');
+    throw new Error('No CPI data from FRED');
   } catch (error) {
     console.error("Error fetching inflation:", error);
     return {
-      rate: 2.9,
+      rate: 2.7,
       date: new Date().toISOString().split('T')[0]
     };
   }
@@ -298,8 +285,8 @@ export const fetchBitcoin = async (): Promise<BitcoinData> => {
   } catch (error) {
     console.error("Error fetching Bitcoin:", error);
     return {
-      price: 97500,
-      change24h: 2.5
+      price: 101000,
+      change24h: 1.5
     };
   }
 };
@@ -324,7 +311,7 @@ export const fetchGold = async (): Promise<GoldData> => {
   } catch (error) {
     console.error("Error fetching Gold:", error);
     return {
-      price: 2650,
+      price: 2680,
       date: new Date().toISOString()
     };
   }
