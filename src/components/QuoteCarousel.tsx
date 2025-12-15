@@ -62,13 +62,12 @@ const QuoteCarousel: React.FC<QuoteCarouselProps> = ({
 
   const currentQuote = quotes[currentIndex];
 
-  // ВИПРАВЛЕНО: функція тепер безпечно форматує джерело або дату
   const formatSource = (quote: QuoteData): string => {
     if (quote.source_url) {
         try {
             return new URL(quote.source_url).hostname.replace('www.', '');
         } catch {
-            // Якщо URL некоректний, ігноруємо
+            // ignore error
         }
     }
     
@@ -88,6 +87,7 @@ const QuoteCarousel: React.FC<QuoteCarouselProps> = ({
 
       <div
         ref={containerRef}
+        // ВАЖЛИВО: touch-pan-y дозволяє горизонтальні свайпи працювати в JS
         className="quote-carousel touch-pan-y min-h-[120px] select-none"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}

@@ -8,37 +8,38 @@
     android:gravity="center"
     android:padding="8dp">
 
-    <!-- Compact Countdown: "1131d 20h 25m 09s" -->
-    <TextView
-        android:id="@+id/countdown_compact"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="1131d 20h 25m 09s"
-        android:textColor="#FFFFFF"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:fontFamily="monospace"
-        android:singleLine="true"
-        android:layout_marginBottom="6dp" />
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical">
 
-    <!-- Progress Bar -->
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        style="@android:style/Widget.ProgressBar.Horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:progressDrawable="@drawable/progress_bar_fill"
-        android:max="1000"
-        android:progress="225"
-        android:layout_marginBottom="4dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TRUMP TERM"
+            android:textColor="#EF4444"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.05"
+            android:layout_marginBottom="4dp"/>
 
-    <!-- Percentage -->
-    <TextView
-        android:id="@+id/progress_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="22.5% complete"
-        android:textColor="#94A3B8"
-        android:textSize="10sp" />
+        <TextView
+            android:id="@+id/widget_day_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Day 1"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="of 1,461"
+            android:textColor="#94A3B8"
+            android:textSize="11sp"/>
+    </LinearLayout>
 
 </LinearLayout>
