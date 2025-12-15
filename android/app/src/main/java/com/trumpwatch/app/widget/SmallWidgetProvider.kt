@@ -45,9 +45,16 @@ class SmallWidgetProvider : AppWidgetProvider() {
             // Calculate countdown
             val countdown = WidgetUtils.calculateCountdown()
 
-            // Update day text
-            val dayText = "Day ${countdown.daysPassed} of ${countdown.totalDays}"
-            views.setTextViewText(R.id.widget_day_text, dayText)
+            // Format compact countdown: "1131d 20h 25m 09s"
+            val compactCountdown = "${countdown.days}d ${countdown.hours.toString().padStart(2, '0')}h ${countdown.minutes.toString().padStart(2, '0')}m ${countdown.seconds.toString().padStart(2, '0')}s"
+            views.setTextViewText(R.id.countdown_compact, compactCountdown)
+
+            // Update progress bar (max 1000 for precision)
+            views.setProgressBar(R.id.progress_bar, 1000, (countdown.percentComplete * 10).toInt(), false)
+
+            // Update progress text
+            val progressText = String.format("%.1f%% complete", countdown.percentComplete)
+            views.setTextViewText(R.id.progress_text, progressText)
 
             // Set click intent to open app
             val intent = Intent(context, MainActivity::class.java)

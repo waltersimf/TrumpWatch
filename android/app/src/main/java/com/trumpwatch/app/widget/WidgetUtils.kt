@@ -1,6 +1,5 @@
 package com.trumpwatch.app.widget
 
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import org.json.JSONObject
@@ -27,6 +26,7 @@ object WidgetUtils {
     }.timeInMillis
 
     private const val TOTAL_DAYS = 1461L
+    private const val GAS_BASELINE = 3.08
 
     data class CountdownData(
         val days: Long,
@@ -44,7 +44,9 @@ object WidgetUtils {
         val sp500Price: Double?,
         val sp500ChangePercent: Double?,
         val bitcoinPrice: Double?,
-        val bitcoinChangePercent: Double?
+        val bitcoinChangePercent: Double?,
+        val gasPrice: Double?,
+        val gasChange: Double?
     )
 
     fun calculateCountdown(): CountdownData {
@@ -83,6 +85,7 @@ object WidgetUtils {
             var sp500Change: Double? = null
             var btc: Double? = null
             var btcChange: Double? = null
+            var gasPrice: Double? = null
 
             // Fetch National Debt
             try {
@@ -128,6 +131,24 @@ object WidgetUtils {
                 e.printStackTrace()
             }
 
+            // Fetch Gas Price via EIA API
+            try {
+                val gasUrl = URL("https://api.eia.gov/v2/petroleum/pri/gnd/data/?api_key=DEMO_KEY&frequency=weekly&data[0]=value&facets[product][]=EPM0&facets[duoarea][]=NUS&sort[0][column]=period&sort[0][direction]=desc&length=1")
+                val gasConn = gasUrl.openConnection() as HttpURLConnection
+                gasConn.connectTimeout = 5000
+                gasConn.readTimeout = 5000
+                val gasResponse = gasConn.inputStream.bufferedReader().readText()
+                val gasJson = JSONObject(gasResponse)
+                val gasData = gasJson.getJSONObject("response").getJSONArray("data")
+                if (gasData.length() > 0) {
+                    gasPrice = gasData.getJSONObject(0).getString("value").toDoubleOrNull()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Fallback
+                gasPrice = 2.95
+            }
+
             // Fetch Bitcoin
             try {
                 val btcUrl = URL("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true")
@@ -143,9 +164,10 @@ object WidgetUtils {
             }
 
             val debtChange = if (debt != null && debtBaseline != null) debt - debtBaseline else null
+            val gasChange = if (gasPrice != null) gasPrice - GAS_BASELINE else null
 
             handler.post {
-                callback(MarketData(debt, debtChange, sp500, sp500Change, btc, btcChange))
+                callback(MarketData(debt, debtChange, sp500, sp500Change, btc, btcChange, gasPrice, gasChange))
             }
         }
     }
@@ -163,9 +185,34 @@ object WidgetUtils {
         return "$prefix$${String.format("%.1f", trillions)}T since Jan 20"
     }
 
+    fun formatDebtChangeShort(change: Double?): String {
+        if (change == null) return ""
+        val trillions = change / 1_000_000_000_000.0
+        val prefix = if (trillions >= 0) "+" else ""
+        return "$prefix$${String.format("%.1f", trillions)}T"
+    }
+
+    fun formatSP500(price: Double?): String {
+        if (price == null) return "---"
+        val formatter = NumberFormat.getNumberInstance(Locale.US)
+        formatter.maximumFractionDigits = 0
+        return formatter.format(price.toLong())
+    }
+
     fun formatPrice(price: Double?): String {
         if (price == null) return "---"
         return "$${String.format("%.2f", price)}"
+    }
+
+    fun formatGasPrice(price: Double?): String {
+        if (price == null) return "---"
+        return "$${String.format("%.2f", price)}"
+    }
+
+    fun formatGasChange(change: Double?): String {
+        if (change == null) return ""
+        val prefix = if (change >= 0) "+" else ""
+        return "$prefix$${String.format("%.2f", change)}"
     }
 
     fun formatBtcPrice(price: Double?): String {
@@ -174,10 +221,22 @@ object WidgetUtils {
         return "$${formatter.format(price.toLong())}"
     }
 
+    fun formatBtcPriceShort(price: Double?): String {
+        if (price == null) return "---"
+        val thousands = price / 1000.0
+        return "$${String.format("%.0f", thousands)}K"
+    }
+
     fun formatPercent(percent: Double?, suffix: String = "today"): String {
         if (percent == null) return ""
         val prefix = if (percent >= 0) "+" else ""
         return "$prefix${String.format("%.2f", percent)}% $suffix"
+    }
+
+    fun formatPercentShort(percent: Double?): String {
+        if (percent == null) return ""
+        val prefix = if (percent >= 0) "+" else ""
+        return "$prefix${String.format("%.1f", percent)}%"
     }
 
     fun formatBtcPercent(percent: Double?): String {

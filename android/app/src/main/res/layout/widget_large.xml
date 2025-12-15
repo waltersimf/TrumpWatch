@@ -7,19 +7,20 @@
     android:orientation="vertical"
     android:padding="12dp">
 
+    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginBottom="8dp">
+        android:layout_marginBottom="10dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Trump"
             android:textColor="#FFFFFF"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:textStyle="bold" />
 
         <TextView
@@ -28,27 +29,28 @@
             android:layout_weight="1"
             android:text="Watch"
             android:textColor="#EF4444"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/widget_day_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Day 323 of 1,461"
+            android:text="Day 330 of 1,461"
             android:textColor="#94A3B8"
-            android:textSize="10sp"
+            android:textSize="11sp"
             android:singleLine="true" />
-
     </LinearLayout>
 
+    <!-- Countdown Blocks - Bigger fonts -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:layout_marginBottom="6dp">
+        android:layout_marginBottom="8dp">
 
+        <!-- Days -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -56,25 +58,23 @@
             android:orientation="vertical"
             android:gravity="center"
             android:background="@drawable/widget_background_card"
-            android:padding="10dp">
-
+            android:padding="12dp">
             <TextView
                 android:id="@+id/countdown_days"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1138"
+                android:text="1131"
                 android:textColor="#FFFFFF"
-                android:textSize="18sp"
+                android:textSize="28sp"
                 android:textStyle="bold"
                 android:fontFamily="monospace"
                 android:singleLine="true" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="DAYS"
                 android:textColor="#94A3B8"
-                android:textSize="9sp" />
+                android:textSize="10sp" />
         </LinearLayout>
 
         <TextView
@@ -82,10 +82,11 @@
             android:layout_height="wrap_content"
             android:text=":"
             android:textColor="#475569"
-            android:textSize="18sp"
+            android:textSize="24sp"
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp" />
 
+        <!-- Hours -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -93,25 +94,23 @@
             android:orientation="vertical"
             android:gravity="center"
             android:background="@drawable/widget_background_card"
-            android:padding="10dp">
-
+            android:padding="12dp">
             <TextView
                 android:id="@+id/countdown_hours"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="11"
+                android:text="20"
                 android:textColor="#FFFFFF"
-                android:textSize="18sp"
+                android:textSize="28sp"
                 android:textStyle="bold"
                 android:fontFamily="monospace"
                 android:singleLine="true" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="HOURS"
+                android:text="HRS"
                 android:textColor="#94A3B8"
-                android:textSize="9sp" />
+                android:textSize="10sp" />
         </LinearLayout>
 
         <TextView
@@ -119,10 +118,11 @@
             android:layout_height="wrap_content"
             android:text=":"
             android:textColor="#475569"
-            android:textSize="18sp"
+            android:textSize="24sp"
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp" />
 
+        <!-- Minutes -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -130,25 +130,23 @@
             android:orientation="vertical"
             android:gravity="center"
             android:background="@drawable/widget_background_card"
-            android:padding="10dp">
-
+            android:padding="12dp">
             <TextView
                 android:id="@+id/countdown_mins"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="56"
+                android:text="25"
                 android:textColor="#FFFFFF"
-                android:textSize="18sp"
+                android:textSize="28sp"
                 android:textStyle="bold"
                 android:fontFamily="monospace"
                 android:singleLine="true" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="MINS"
                 android:textColor="#94A3B8"
-                android:textSize="9sp" />
+                android:textSize="10sp" />
         </LinearLayout>
 
         <TextView
@@ -156,10 +154,11 @@
             android:layout_height="wrap_content"
             android:text=":"
             android:textColor="#475569"
-            android:textSize="18sp"
+            android:textSize="24sp"
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp" />
 
+        <!-- Seconds -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -167,60 +166,53 @@
             android:orientation="vertical"
             android:gravity="center"
             android:background="@drawable/widget_background_card"
-            android:padding="10dp">
-
+            android:padding="12dp">
             <TextView
                 android:id="@+id/countdown_secs"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="17"
+                android:text="09"
                 android:textColor="#FFFFFF"
-                android:textSize="18sp"
+                android:textSize="28sp"
                 android:textStyle="bold"
                 android:fontFamily="monospace"
                 android:singleLine="true" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="SECS"
                 android:textColor="#94A3B8"
-                android:textSize="9sp" />
+                android:textSize="10sp" />
         </LinearLayout>
-
     </LinearLayout>
 
-    <LinearLayout
+    <!-- Progress Bar -->
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="@android:style/Widget.ProgressBar.Horizontal"
         android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:progressDrawable="@drawable/progress_bar_fill"
+        android:max="100"
+        android:progress="22" />
+
+    <TextView
+        android:id="@+id/progress_text"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginBottom="8dp">
+        android:text="22.53% of term completed"
+        android:textColor="#94A3B8"
+        android:textSize="10sp"
+        android:layout_marginTop="3dp"
+        android:layout_marginBottom="10dp" />
 
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            style="@android:style/Widget.ProgressBar.Horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="6dp"
-            android:progressDrawable="@drawable/progress_bar_fill"
-            android:max="100"
-            android:progress="22" />
-
-        <TextView
-            android:id="@+id/progress_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="22.07% of term completed"
-            android:textColor="#94A3B8"
-            android:textSize="9sp"
-            android:layout_marginTop="2dp" />
-
-    </LinearLayout>
-
+    <!-- Stats Grid: 4 cards -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
+        <!-- National Debt -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -228,34 +220,31 @@
             android:orientation="vertical"
             android:background="@drawable/widget_background_card"
             android:padding="10dp"
-            android:layout_marginEnd="4dp">
-
+            android:layout_marginEnd="3dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="NATIONAL DEBT"
+                android:text="DEBT"
                 android:textColor="#94A3B8"
                 android:textSize="9sp" />
-
             <TextView
                 android:id="@+id/stat_debt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="$36.4T"
                 android:textColor="#EF4444"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textStyle="bold" />
-
             <TextView
                 android:id="@+id/stat_debt_change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="+$2.1T since Jan 20"
+                android:text="+$0.2T"
                 android:textColor="#64748B"
-                android:textSize="8sp" />
-
+                android:textSize="9sp" />
         </LinearLayout>
 
+        <!-- S&P 500 -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -265,33 +254,30 @@
             android:padding="10dp"
             android:layout_marginStart="2dp"
             android:layout_marginEnd="2dp">
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="S&amp;P 500"
                 android:textColor="#94A3B8"
                 android:textSize="9sp" />
-
             <TextView
                 android:id="@+id/stat_sp500"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="$595.50"
+                android:text="5,950"
                 android:textColor="#22C55E"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textStyle="bold" />
-
             <TextView
                 android:id="@+id/stat_sp500_change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="+0.42% today"
+                android:text="+0.5%"
                 android:textColor="#64748B"
-                android:textSize="8sp" />
-
+                android:textSize="9sp" />
         </LinearLayout>
 
+        <!-- Gas Price -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -299,34 +285,62 @@
             android:orientation="vertical"
             android:background="@drawable/widget_background_card"
             android:padding="10dp"
-            android:layout_marginStart="4dp">
-
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="BITCOIN"
+                android:text="GAS"
                 android:textColor="#94A3B8"
                 android:textSize="9sp" />
+            <TextView
+                android:id="@+id/stat_gas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="$2.95"
+                android:textColor="#22C55E"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/stat_gas_change"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-$0.13"
+                android:textColor="#64748B"
+                android:textSize="9sp" />
+        </LinearLayout>
 
+        <!-- Bitcoin -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:background="@drawable/widget_background_card"
+            android:padding="10dp"
+            android:layout_marginStart="3dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BTC"
+                android:textColor="#94A3B8"
+                android:textSize="9sp" />
             <TextView
                 android:id="@+id/stat_bitcoin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="$97,500"
+                android:text="$101K"
                 android:textColor="#F59E0B"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textStyle="bold" />
-
             <TextView
                 android:id="@+id/stat_bitcoin_change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="+2.5% 24h"
+                android:text="+2.5%"
                 android:textColor="#64748B"
-                android:textSize="8sp" />
-
+                android:textSize="9sp" />
         </LinearLayout>
-
     </LinearLayout>
 
 </LinearLayout>

@@ -1,57 +1,44 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_small_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
+    android:orientation="vertical"
+    android:gravity="center"
     android:padding="8dp">
 
+    <!-- Compact Countdown: "1131d 20h 25m 09s" -->
     <TextView
-        android:id="@+id/app_title"
+        android:id="@+id/countdown_compact"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="2dp"
-        android:text="TRUMP WATCH"
-        android:textColor="#EF4444"
-        android:textSize="10sp"
+        android:text="1131d 20h 25m 09s"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
         android:textStyle="bold"
-        android:letterSpacing="0.05" />
+        android:fontFamily="monospace"
+        android:singleLine="true"
+        android:layout_marginBottom="6dp" />
 
-    <LinearLayout
+    <!-- Progress Bar -->
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="@android:style/Widget.ProgressBar.Horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:layout_height="4dp"
+        android:progressDrawable="@drawable/progress_bar_fill"
+        android:max="1000"
+        android:progress="225"
+        android:layout_marginBottom="4dp" />
 
-        <TextView
-            android:id="@+id/widget_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="US Debt"
-            android:textColor="#94A3B8"
-            android:textSize="11sp"
-            android:textAllCaps="true" />
-
-        <TextView
-            android:id="@+id/widget_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="$36.1T"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginTop="2dp"/>
-    </LinearLayout>
-
+    <!-- Percentage -->
     <TextView
-        android:id="@+id/last_updated"
+        android:id="@+id/progress_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:text="10:00 AM"
-        android:textColor="#64748B"
-        android:textSize="9sp" />
+        android:text="22.5% complete"
+        android:textColor="#94A3B8"
+        android:textSize="10sp" />
 
-</RelativeLayout>
+</LinearLayout>

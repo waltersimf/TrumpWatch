@@ -48,20 +48,31 @@ class MediumWidgetProvider : AppWidgetProvider() {
             // Calculate countdown
             val countdown = WidgetUtils.calculateCountdown()
 
-            // Update countdown
-            views.setTextViewText(R.id.countdown_days, countdown.days.toString().padStart(2, '0'))
+            // Update day text
+            val dayText = "Day ${countdown.daysPassed} of ${countdown.totalDays}"
+            views.setTextViewText(R.id.widget_day_text, dayText)
+
+            // Update countdown blocks
+            views.setTextViewText(R.id.countdown_days, countdown.days.toString())
             views.setTextViewText(R.id.countdown_hours, countdown.hours.toString().padStart(2, '0'))
             views.setTextViewText(R.id.countdown_mins, countdown.minutes.toString().padStart(2, '0'))
             views.setTextViewText(R.id.countdown_secs, countdown.seconds.toString().padStart(2, '0'))
+
+            // Update progress bar
+            views.setProgressBar(R.id.progress_bar, 100, countdown.percentComplete.toInt(), false)
+            val progressText = String.format("%.2f%% of term completed", countdown.percentComplete)
+            views.setTextViewText(R.id.progress_text, progressText)
 
             // Fetch market data
             WidgetUtils.fetchMarketData { data ->
                 // Update debt
                 views.setTextViewText(R.id.stat_debt, WidgetUtils.formatDebt(data.nationalDebt))
+                views.setTextViewText(R.id.stat_debt_change, WidgetUtils.formatDebtChange(data.debtChange))
                 views.setTextColor(R.id.stat_debt, Color.parseColor(COLOR_RED))
 
                 // Update S&P 500
-                views.setTextViewText(R.id.stat_sp500, WidgetUtils.formatPrice(data.sp500Price))
+                views.setTextViewText(R.id.stat_sp500, WidgetUtils.formatSP500(data.sp500Price))
+                views.setTextViewText(R.id.stat_sp500_change, WidgetUtils.formatPercent(data.sp500ChangePercent, "today"))
                 val sp500Color = if (WidgetUtils.isPositive(data.sp500ChangePercent)) COLOR_GREEN else COLOR_RED
                 views.setTextColor(R.id.stat_sp500, Color.parseColor(sp500Color))
 
