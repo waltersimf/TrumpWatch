@@ -51,7 +51,6 @@ class MediumWidgetProvider : AppWidgetProvider() {
             val dayText = "Day ${countdown.daysPassed} of ${countdown.totalDays}"
             views.setTextViewText(R.id.widget_day_text, dayText)
 
-            // Countdown without seconds
             views.setTextViewText(R.id.countdown_days, countdown.days.toString())
             views.setTextViewText(R.id.countdown_hours, countdown.hours.toString().padStart(2, '0'))
             views.setTextViewText(R.id.countdown_mins, countdown.minutes.toString().padStart(2, '0'))
@@ -61,28 +60,27 @@ class MediumWidgetProvider : AppWidgetProvider() {
             views.setTextViewText(R.id.progress_text, progressText)
 
             WidgetUtils.fetchMarketData { data ->
-                // Debt
+                // Debt - always red
                 views.setTextViewText(R.id.stat_debt, WidgetUtils.formatDebt(data.nationalDebt))
                 views.setTextViewText(R.id.stat_debt_change, WidgetUtils.formatDebtChangeShort(data.debtChange))
                 views.setTextColor(R.id.stat_debt, Color.parseColor(COLOR_RED))
 
-                // S&P 500
+                // S&P 500 - green if positive, red if negative
                 views.setTextViewText(R.id.stat_sp500, WidgetUtils.formatSP500(data.sp500Price))
                 views.setTextViewText(R.id.stat_sp500_change, WidgetUtils.formatPercentShort(data.sp500ChangePercent))
-                val sp500Color = if (WidgetUtils.isPositive(data.sp500ChangePercent)) COLOR_GREEN else COLOR_RED
+                val sp500Color = if (WidgetUtils.isNegative(data.sp500ChangePercent)) COLOR_RED else COLOR_GREEN
                 views.setTextColor(R.id.stat_sp500, Color.parseColor(sp500Color))
 
-                // Gas
+                // Gas - green if below baseline, red if above
                 views.setTextViewText(R.id.stat_gas, WidgetUtils.formatGasPrice(data.gasPrice))
                 views.setTextViewText(R.id.stat_gas_change, WidgetUtils.formatGasChange(data.gasChange))
                 val gasColor = if ((data.gasChange ?: 0.0) <= 0) COLOR_GREEN else COLOR_RED
                 views.setTextColor(R.id.stat_gas, Color.parseColor(gasColor))
 
-                // Bitcoin
+                // Bitcoin - amber always, it's volatile
                 views.setTextViewText(R.id.stat_bitcoin, WidgetUtils.formatBtcPriceShort(data.bitcoinPrice))
                 views.setTextViewText(R.id.stat_bitcoin_change, WidgetUtils.formatPercentShort(data.bitcoinChangePercent))
-                val btcColor = if (WidgetUtils.isPositive(data.bitcoinChangePercent)) COLOR_GREEN else COLOR_AMBER
-                views.setTextColor(R.id.stat_bitcoin, Color.parseColor(btcColor))
+                views.setTextColor(R.id.stat_bitcoin, Color.parseColor(COLOR_AMBER))
 
                 appWidgetManager.updateAppWidget(appWidgetId, views)
             }

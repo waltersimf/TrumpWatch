@@ -52,7 +52,6 @@ class LargeWidgetProvider : AppWidgetProvider() {
             val dayText = "Day ${countdown.daysPassed} of ${countdown.totalDays}"
             views.setTextViewText(R.id.widget_day_text, dayText)
 
-            // Countdown without seconds
             views.setTextViewText(R.id.countdown_days, countdown.days.toString())
             views.setTextViewText(R.id.countdown_hours, countdown.hours.toString().padStart(2, '0'))
             views.setTextViewText(R.id.countdown_mins, countdown.minutes.toString().padStart(2, '0'))
@@ -62,7 +61,7 @@ class LargeWidgetProvider : AppWidgetProvider() {
             views.setTextViewText(R.id.progress_text, progressText)
 
             WidgetUtils.fetchMarketData { data ->
-                // Row 1: Debt
+                // Row 1: Debt - always red
                 views.setTextViewText(R.id.stat_debt, WidgetUtils.formatDebt(data.nationalDebt))
                 views.setTextViewText(R.id.stat_debt_change, WidgetUtils.formatDebtChangeShort(data.debtChange))
                 views.setTextColor(R.id.stat_debt, Color.parseColor(COLOR_RED))
@@ -70,7 +69,7 @@ class LargeWidgetProvider : AppWidgetProvider() {
                 // Row 1: S&P 500
                 views.setTextViewText(R.id.stat_sp500, WidgetUtils.formatSP500(data.sp500Price))
                 views.setTextViewText(R.id.stat_sp500_change, WidgetUtils.formatPercentShort(data.sp500ChangePercent))
-                val sp500Color = if (WidgetUtils.isPositive(data.sp500ChangePercent)) COLOR_GREEN else COLOR_RED
+                val sp500Color = if (WidgetUtils.isNegative(data.sp500ChangePercent)) COLOR_RED else COLOR_GREEN
                 views.setTextColor(R.id.stat_sp500, Color.parseColor(sp500Color))
 
                 // Row 1: Gas
@@ -79,13 +78,12 @@ class LargeWidgetProvider : AppWidgetProvider() {
                 val gasColor = if ((data.gasChange ?: 0.0) <= 0) COLOR_GREEN else COLOR_RED
                 views.setTextColor(R.id.stat_gas, Color.parseColor(gasColor))
 
-                // Row 1: Bitcoin
+                // Row 1: Bitcoin - amber
                 views.setTextViewText(R.id.stat_bitcoin, WidgetUtils.formatBtcPriceShort(data.bitcoinPrice))
                 views.setTextViewText(R.id.stat_bitcoin_change, WidgetUtils.formatPercentShort(data.bitcoinChangePercent))
-                val btcColor = if (WidgetUtils.isPositive(data.bitcoinChangePercent)) COLOR_GREEN else COLOR_AMBER
-                views.setTextColor(R.id.stat_bitcoin, Color.parseColor(btcColor))
+                views.setTextColor(R.id.stat_bitcoin, Color.parseColor(COLOR_AMBER))
 
-                // Row 2: Gold
+                // Row 2: Gold - amber
                 views.setTextViewText(R.id.stat_gold, WidgetUtils.formatGoldPrice(data.goldPrice))
                 views.setTextViewText(R.id.stat_gold_change, WidgetUtils.formatPercentShort(data.goldChangePercent))
                 views.setTextColor(R.id.stat_gold, Color.parseColor(COLOR_AMBER))
@@ -93,15 +91,15 @@ class LargeWidgetProvider : AppWidgetProvider() {
                 // Row 2: Oil
                 views.setTextViewText(R.id.stat_oil, WidgetUtils.formatOilPrice(data.oilPrice))
                 views.setTextViewText(R.id.stat_oil_change, WidgetUtils.formatPercentShort(data.oilChangePercent))
-                val oilColor = if (WidgetUtils.isPositive(data.oilChangePercent)) COLOR_GREEN else COLOR_RED
+                val oilColor = if (WidgetUtils.isNegative(data.oilChangePercent)) COLOR_RED else COLOR_GREEN
                 views.setTextColor(R.id.stat_oil, Color.parseColor(oilColor))
 
-                // Row 2: Unemployment
+                // Row 2: Unemployment - white
                 views.setTextViewText(R.id.stat_unemployment, WidgetUtils.formatPercent2(data.unemploymentRate))
                 views.setTextViewText(R.id.stat_unemployment_change, WidgetUtils.formatPercentChangeShort(data.unemploymentChange))
                 views.setTextColor(R.id.stat_unemployment, Color.parseColor(COLOR_WHITE))
 
-                // Row 2: Inflation
+                // Row 2: Inflation - red if > 3%, green if <= 3%
                 views.setTextViewText(R.id.stat_inflation, WidgetUtils.formatPercent2(data.inflationRate))
                 views.setTextViewText(R.id.stat_inflation_change, WidgetUtils.formatPercentChangeShort(data.inflationChange))
                 val inflColor = if ((data.inflationRate ?: 0.0) > 3.0) COLOR_RED else COLOR_GREEN

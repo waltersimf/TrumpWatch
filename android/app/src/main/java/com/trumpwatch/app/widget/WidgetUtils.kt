@@ -157,7 +157,7 @@ object WidgetUtils {
                 gasPrice = 2.95
             }
 
-            // Fetch Bitcoin
+            // Fetch Bitcoin - Primary: CoinGecko
             try {
                 val btcUrl = URL("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true")
                 val btcConn = btcUrl.openConnection() as HttpURLConnection
@@ -167,7 +167,21 @@ object WidgetUtils {
                 val btcJson = JSONObject(btcResponse).getJSONObject("bitcoin")
                 btc = btcJson.getDouble("usd")
                 btcChange = btcJson.getDouble("usd_24h_change")
-            } catch (e: Exception) { e.printStackTrace() }
+            } catch (e: Exception) {
+                // Fallback: CoinCap API
+                try {
+                    val fallbackUrl = URL("https://api.coincap.io/v2/assets/bitcoin")
+                    val fallbackConn = fallbackUrl.openConnection() as HttpURLConnection
+                    fallbackConn.connectTimeout = 5000
+                    fallbackConn.readTimeout = 5000
+                    val fallbackResponse = fallbackConn.inputStream.bufferedReader().readText()
+                    val fallbackJson = JSONObject(fallbackResponse).getJSONObject("data")
+                    btc = fallbackJson.getString("priceUsd").toDoubleOrNull()
+                    btcChange = fallbackJson.getString("changePercent24Hr").toDoubleOrNull()
+                } catch (e2: Exception) {
+                    e2.printStackTrace()
+                }
+            }
 
             // Fetch Gold Price
             try {
@@ -184,7 +198,7 @@ object WidgetUtils {
                 goldChange = 0.5
             }
 
-            // Fetch Oil Price (WTI Crude via FRED)
+            // Fetch Oil Price
             try {
                 val oilUrl = URL("https://api.stlouisfed.org/fred/series/observations?series_id=DCOILWTICO&api_key=82376aa22a515252bb9e18ddd772b3e0&file_type=json&limit=2&sort_order=desc")
                 val oilConn = oilUrl.openConnection() as HttpURLConnection
@@ -207,7 +221,7 @@ object WidgetUtils {
                 oilChange = -0.3
             }
 
-            // Fetch Unemployment Rate (FRED)
+            // Fetch Unemployment Rate
             try {
                 val unempUrl = URL("https://api.stlouisfed.org/fred/series/observations?series_id=UNRATE&api_key=82376aa22a515252bb9e18ddd772b3e0&file_type=json&limit=2&sort_order=desc")
                 val unempConn = unempUrl.openConnection() as HttpURLConnection
@@ -230,9 +244,9 @@ object WidgetUtils {
                 unemploymentChange = 0.1
             }
 
-            // Fetch Inflation Rate (CPI via FRED)
+            // Fetch Inflation Rate
             try {
-                val cpiUrl = URL("https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&api_key=82376aa22a515252bb9e18ddd772b3e0&file_type=json&limit=13&sort_order=desc")
+                val cpiUrl = URL("https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&api_key=82376aa22a515252bb9e18ddd772b3e0&file_type=json&limit=14&sort_order=desc")
                 val cpiConn = cpiUrl.openConnection() as HttpURLConnection
                 cpiConn.connectTimeout = 5000
                 cpiConn.readTimeout = 5000
@@ -242,15 +256,18 @@ object WidgetUtils {
                 if (cpiObs.length() >= 13) {
                     val currentCpi = cpiObs.getJSONObject(0).getString("value").toDoubleOrNull()
                     val yearAgoCpi = cpiObs.getJSONObject(12).getString("value").toDoubleOrNull()
-                    val prevMonthCpi = cpiObs.getJSONObject(1).getString("value").toDoubleOrNull()
-                    val prevYearAgoCpi = cpiObs.getJSONObject(13).getString("value").toDoubleOrNull()
                     
                     if (currentCpi != null && yearAgoCpi != null && yearAgoCpi > 0) {
                         inflationRate = ((currentCpi - yearAgoCpi) / yearAgoCpi) * 100
                     }
-                    if (prevMonthCpi != null && prevYearAgoCpi != null && prevYearAgoCpi > 0 && inflationRate != null) {
-                        val prevInflation = ((prevMonthCpi - prevYearAgoCpi) / prevYearAgoCpi) * 100
-                        inflationChange = inflationRate!! - prevInflation
+                    
+                    if (cpiObs.length() >= 14) {
+                        val prevMonthCpi = cpiObs.getJSONObject(1).getString("value").toDoubleOrNull()
+                        val prevYearAgoCpi = cpiObs.getJSONObject(13).getString("value").toDoubleOrNull()
+                        if (prevMonthCpi != null && prevYearAgoCpi != null && prevYearAgoCpi > 0 && inflationRate != null) {
+                            val prevInflation = ((prevMonthCpi - prevYearAgoCpi) / prevYearAgoCpi) * 100
+                            inflationChange = inflationRate!! - prevInflation
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -275,13 +292,6 @@ object WidgetUtils {
         if (debt == null) return "---"
         val trillions = debt / 1_000_000_000_000.0
         return "$${String.format("%.1f", trillions)}T"
-    }
-
-    fun formatDebtChange(change: Double?): String {
-        if (change == null) return ""
-        val trillions = change / 1_000_000_000_000.0
-        val prefix = if (trillions >= 0) "+" else ""
-        return "$prefix$${String.format("%.1f", trillions)}T since Jan 20"
     }
 
     fun formatDebtChangeShort(change: Double?): String {
@@ -344,11 +354,7 @@ object WidgetUtils {
         return "$prefix${String.format("%.1f", change)}%"
     }
 
-    fun formatPercent(percent: Double?, suffix: String = "today"): String {
-        if (percent == null) return ""
-        val prefix = if (percent >= 0) "+" else ""
-        return "$prefix${String.format("%.2f", percent)}% $suffix"
-    }
-
     fun isPositive(value: Double?): Boolean = (value ?: 0.0) >= 0
+    
+    fun isNegative(value: Double?): Boolean = (value ?: 0.0) < 0
 }

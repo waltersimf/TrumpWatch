@@ -8,11 +8,32 @@
     android:gravity="center"
     android:padding="8dp">
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="4dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Trump"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            android:textStyle="bold"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Watch"
+            android:textColor="#EF4444"
+            android:textSize="11sp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
     <TextView
         android:id="@+id/countdown_compact"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="1131d 19h 16m"
+        android:text="1131d 18h 55m"
         android:textColor="#FFFFFF"
         android:textSize="14sp"
         android:textStyle="bold"
@@ -23,8 +44,8 @@
         style="@android:style/Widget.ProgressBar.Horizontal"
         android:layout_width="match_parent"
         android:layout_height="4dp"
-        android:layout_marginTop="6dp"
-        android:layout_marginBottom="4dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="3dp"
         android:progressDrawable="@drawable/progress_bar_fill"
         android:max="1000"
         android:progress="225"/>
@@ -35,5 +56,5 @@
         android:layout_height="wrap_content"
         android:text="22,5% complete"
         android:textColor="#94A3B8"
-        android:textSize="10sp"/>
+        android:textSize="9sp"/>
 </LinearLayout>
