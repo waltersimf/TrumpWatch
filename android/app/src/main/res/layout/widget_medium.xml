@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:padding="12dp">
 
-    <!-- Header: TrumpWatch + Day counter -->
+    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -16,77 +16,164 @@
         android:layout_marginBottom="8dp">
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Trump"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-
-        <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="TrumpWatch Countdown"
-            android:textColor="#EF4444"
-            android:textStyle="bold"
-            android:textSize="12sp"
-            android:textAllCaps="true"
-            android:letterSpacing="0.05"/>
+            android:text="TrumpWatch"
+            android:textSize="14sp">
+            <span android:text="Trump" android:textColor="#FFFFFF" />
+            <span android:text="Watch" android:textColor="#EF4444" />
+        </TextView>
+
+        <TextView
+            android:id="@+id/day_counter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Day 330 of 1,461"
+            android:textColor="#94A3B8"
+            android:textSize="11sp"/>
     </LinearLayout>
 
-    <!-- Countdown Blocks -->
+    <!-- Countdown blocks -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:background="@drawable/widget_background_card"
-        android:paddingVertical="8dp"
         android:layout_marginBottom="8dp">
 
-        <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-            <TextView android:id="@+id/countdown_days" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="00" android:textColor="#FFFFFF" android:textSize="16sp" android:textStyle="bold"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="DAYS" android:textColor="#64748B" android:textSize="8sp"/>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="@drawable/countdown_box_background"
+            android:padding="8dp"
+            android:layout_marginEnd="4dp">
+            <TextView
+                android:id="@+id/days_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1131"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DAYS"
+                android:textColor="#94A3B8"
+                android:textSize="9sp"/>
         </LinearLayout>
-        
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=":" android:textColor="#475569"/>
 
-        <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-            <TextView android:id="@+id/countdown_hours" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="00" android:textColor="#FFFFFF" android:textSize="16sp" android:textStyle="bold"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="HRS" android:textColor="#64748B" android:textSize="8sp"/>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="@drawable/countdown_box_background"
+            android:padding="8dp"
+            android:layout_marginEnd="4dp">
+            <TextView
+                android:id="@+id/hours_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="19"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="HRS"
+                android:textColor="#94A3B8"
+                android:textSize="9sp"/>
         </LinearLayout>
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=":" android:textColor="#475569"/>
-
-        <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-            <TextView android:id="@+id/countdown_mins" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="00" android:textColor="#FFFFFF" android:textSize="16sp" android:textStyle="bold"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MIN" android:textColor="#64748B" android:textSize="8sp"/>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="@drawable/countdown_box_background"
+            android:padding="8dp"
+            android:layout_marginEnd="4dp">
+            <TextView
+                android:id="@+id/minutes_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="29"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MIN"
+                android:textColor="#94A3B8"
+                android:textSize="9sp"/>
         </LinearLayout>
-        
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=":" android:textColor="#475569"/>
 
-        <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-            <TextView android:id="@+id/countdown_secs" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="00" android:textColor="#FFFFFF" android:textSize="16sp" android:textStyle="bold"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SEC" android:textColor="#64748B" android:textSize="8sp"/>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="@drawable/countdown_box_background"
+            android:padding="8dp">
+            <TextView
+                android:id="@+id/seconds_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="50"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SEC"
+                android:textColor="#94A3B8"
+                android:textSize="9sp"/>
         </LinearLayout>
     </LinearLayout>
 
+    <!-- Progress bar -->
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:progressDrawable="@drawable/progress_bar_fill"
+        android:max="1000"
+        android:progress="225"/>
+
+    <TextView
+        android:id="@+id/progress_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="8dp"
+        android:text="22.53% of term completed"
+        android:textColor="#94A3B8"
+        android:textSize="10sp"/>
+
+    <!-- Stats row -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-        <!-- Days -->
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center_vertical"
-            android:paddingEnd="4dp">
+            android:layout_marginEnd="8dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -94,32 +181,20 @@
                 android:textColor="#94A3B8"
                 android:textSize="10sp"/>
             <TextView
-                android:id="@+id/stat_debt"
+                android:id="@+id/debt_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="$36.1T"
+                android:text="$38,3T"
                 android:textColor="#EF4444"
-                android:textStyle="bold"
-                android:textSize="14sp"/>
+                android:textSize="16sp"
+                android:textStyle="bold"/>
         </LinearLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=":"
-            android:textColor="#475569"
-            android:textSize="16sp"
-            android:layout_marginStart="3dp"
-            android:layout_marginEnd="3dp" />
-
-        <!-- Minutes -->
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center_vertical"
-            android:paddingStart="4dp">
+            android:orientation="vertical">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -127,13 +202,14 @@
                 android:textColor="#94A3B8"
                 android:textSize="10sp"/>
             <TextView
-                android:id="@+id/stat_sp500"
+                android:id="@+id/sp500_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="5,900"
+                android:text="6,827"
                 android:textColor="#22C55E"
-                android:textStyle="bold"
-                android:textSize="14sp"/>
+                android:textSize="16sp"
+                android:textStyle="bold"/>
         </LinearLayout>
     </LinearLayout>
+
 </LinearLayout>
