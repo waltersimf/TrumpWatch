@@ -7,14 +7,12 @@
     android:orientation="vertical"
     android:padding="12dp">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:layout_marginBottom="8dp">
-
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -35,9 +33,8 @@
                 android:textSize="16sp"
                 android:textStyle="bold"/>
         </LinearLayout>
-
         <TextView
-            android:id="@+id/day_counter"
+            android:id="@+id/widget_day_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Day 330 of 1461"
@@ -45,7 +42,6 @@
             android:textSize="12sp"/>
     </LinearLayout>
 
-    <!-- Countdown blocks -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -63,15 +59,13 @@
             android:padding="10dp"
             android:layout_marginEnd="6dp">
             <TextView
-                android:id="@+id/days_value"
+                android:id="@+id/countdown_days"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="1131"
                 android:textColor="#FFFFFF"
                 android:textSize="28sp"
-                android:textStyle="bold"
-                android:maxLines="1"
-                android:singleLine="true"/>
+                android:textStyle="bold"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -90,7 +84,7 @@
             android:padding="10dp"
             android:layout_marginEnd="6dp">
             <TextView
-                android:id="@+id/hours_value"
+                android:id="@+id/countdown_hours"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="19"
@@ -115,7 +109,7 @@
             android:padding="10dp"
             android:layout_marginEnd="6dp">
             <TextView
-                android:id="@+id/minutes_value"
+                android:id="@+id/countdown_mins"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="30"
@@ -139,7 +133,7 @@
             android:background="@drawable/countdown_box_background"
             android:padding="10dp">
             <TextView
-                android:id="@+id/seconds_value"
+                android:id="@+id/countdown_secs"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="03"
@@ -155,7 +149,6 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Progress bar -->
     <ProgressBar
         android:id="@+id/progress_bar"
         style="@android:style/Widget.ProgressBar.Horizontal"
@@ -175,7 +168,6 @@
         android:textColor="#94A3B8"
         android:textSize="11sp"/>
 
-    <!-- Stats row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -196,7 +188,7 @@
                 android:textColor="#94A3B8"
                 android:textSize="9sp"/>
             <TextView
-                android:id="@+id/debt_value"
+                android:id="@+id/stat_debt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="$38,3T"
@@ -204,7 +196,7 @@
                 android:textSize="18sp"
                 android:textStyle="bold"/>
             <TextView
-                android:id="@+id/debt_change"
+                android:id="@+id/stat_debt_change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="+$2,1T"
@@ -227,7 +219,7 @@
                 android:textColor="#94A3B8"
                 android:textSize="9sp"/>
             <TextView
-                android:id="@+id/sp500_value"
+                android:id="@+id/stat_sp500"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="6,827"
@@ -235,7 +227,7 @@
                 android:textSize="18sp"
                 android:textStyle="bold"/>
             <TextView
-                android:id="@+id/sp500_change"
+                android:id="@+id/stat_sp500_change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="-1,1%"
@@ -258,7 +250,7 @@
                 android:textColor="#94A3B8"
                 android:textSize="9sp"/>
             <TextView
-                android:id="@+id/gas_value"
+                android:id="@+id/stat_gas"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="$3,07"
@@ -266,7 +258,7 @@
                 android:textSize="18sp"
                 android:textStyle="bold"/>
             <TextView
-                android:id="@+id/gas_change"
+                android:id="@+id/stat_gas_change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="$-0.01"
@@ -288,7 +280,7 @@
                 android:textColor="#94A3B8"
                 android:textSize="9sp"/>
             <TextView
-                android:id="@+id/btc_value"
+                android:id="@+id/stat_bitcoin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="$89K"
@@ -296,7 +288,7 @@
                 android:textSize="18sp"
                 android:textStyle="bold"/>
             <TextView
-                android:id="@+id/btc_change"
+                android:id="@+id/stat_bitcoin_change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="+0,1%"
@@ -304,5 +296,4 @@
                 android:textSize="9sp"/>
         </LinearLayout>
     </LinearLayout>
-
 </LinearLayout>
