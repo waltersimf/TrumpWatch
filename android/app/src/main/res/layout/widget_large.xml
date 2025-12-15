@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginBottom="8dp">
+        android:layout_marginBottom="6dp">
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -47,7 +47,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:layout_marginBottom="8dp">
+        android:layout_marginBottom="6dp">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -57,14 +57,14 @@
             android:gravity="center"
             android:background="@drawable/countdown_box_background"
             android:padding="10dp"
-            android:layout_marginEnd="6dp">
+            android:layout_marginEnd="4dp">
             <TextView
                 android:id="@+id/countdown_days"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="1131"
                 android:textColor="#FFFFFF"
-                android:textSize="28sp"
+                android:textSize="26sp"
                 android:textStyle="bold"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -82,14 +82,14 @@
             android:gravity="center"
             android:background="@drawable/countdown_box_background"
             android:padding="10dp"
-            android:layout_marginEnd="6dp">
+            android:layout_marginEnd="4dp">
             <TextView
                 android:id="@+id/countdown_hours"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="19"
                 android:textColor="#FFFFFF"
-                android:textSize="28sp"
+                android:textSize="26sp"
                 android:textStyle="bold"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -106,44 +106,19 @@
             android:orientation="vertical"
             android:gravity="center"
             android:background="@drawable/countdown_box_background"
-            android:padding="10dp"
-            android:layout_marginEnd="6dp">
+            android:padding="10dp">
             <TextView
                 android:id="@+id/countdown_mins"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="30"
+                android:text="16"
                 android:textColor="#FFFFFF"
-                android:textSize="28sp"
+                android:textSize="26sp"
                 android:textStyle="bold"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="MINS"
-                android:textColor="#94A3B8"
-                android:textSize="10sp"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:background="@drawable/countdown_box_background"
-            android:padding="10dp">
-            <TextView
-                android:id="@+id/countdown_secs"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="03"
-                android:textColor="#FFFFFF"
-                android:textSize="28sp"
-                android:textStyle="bold"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="SECS"
                 android:textColor="#94A3B8"
                 android:textSize="10sp"/>
         </LinearLayout>
@@ -153,7 +128,7 @@
         android:id="@+id/progress_bar"
         style="@android:style/Widget.ProgressBar.Horizontal"
         android:layout_width="match_parent"
-        android:layout_height="5dp"
+        android:layout_height="4dp"
         android:progressDrawable="@drawable/progress_bar_fill"
         android:max="1000"
         android:progress="225"/>
@@ -163,11 +138,143 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="6dp"
         android:text="22,53% of term completed"
         android:textColor="#94A3B8"
-        android:textSize="11sp"/>
+        android:textSize="10sp"/>
 
+    <!-- Row 1: DEBT, S&P, GAS, BTC -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="4dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:background="@drawable/countdown_box_background"
+            android:padding="6dp"
+            android:layout_marginEnd="4dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DEBT"
+                android:textColor="#94A3B8"
+                android:textSize="8sp"/>
+            <TextView
+                android:id="@+id/stat_debt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="$38,3T"
+                android:textColor="#EF4444"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/stat_debt_change"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+$2,1T"
+                android:textColor="#94A3B8"
+                android:textSize="8sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:background="@drawable/countdown_box_background"
+            android:padding="6dp"
+            android:layout_marginEnd="4dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="S&amp;P 500"
+                android:textColor="#94A3B8"
+                android:textSize="8sp"/>
+            <TextView
+                android:id="@+id/stat_sp500"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="6,827"
+                android:textColor="#22C55E"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/stat_sp500_change"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-1,1%"
+                android:textColor="#94A3B8"
+                android:textSize="8sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:background="@drawable/countdown_box_background"
+            android:padding="6dp"
+            android:layout_marginEnd="4dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="GAS"
+                android:textColor="#94A3B8"
+                android:textSize="8sp"/>
+            <TextView
+                android:id="@+id/stat_gas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="$3,07"
+                android:textColor="#EF4444"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/stat_gas_change"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="$-0.01"
+                android:textColor="#94A3B8"
+                android:textSize="8sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:background="@drawable/countdown_box_background"
+            android:padding="6dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BTC"
+                android:textColor="#94A3B8"
+                android:textSize="8sp"/>
+            <TextView
+                android:id="@+id/stat_bitcoin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="$101K"
+                android:textColor="#22C55E"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/stat_bitcoin_change"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+2,1%"
+                android:textColor="#94A3B8"
+                android:textSize="8sp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Row 2: GOLD, OIL, UNEMP, INFL -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -179,29 +286,29 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:background="@drawable/countdown_box_background"
-            android:padding="8dp"
+            android:padding="6dp"
             android:layout_marginEnd="4dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="DEBT"
+                android:text="GOLD"
                 android:textColor="#94A3B8"
-                android:textSize="9sp"/>
+                android:textSize="8sp"/>
             <TextView
-                android:id="@+id/stat_debt"
+                android:id="@+id/stat_gold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="$38,3T"
-                android:textColor="#EF4444"
-                android:textSize="18sp"
+                android:text="$2,650"
+                android:textColor="#F59E0B"
+                android:textSize="14sp"
                 android:textStyle="bold"/>
             <TextView
-                android:id="@+id/stat_debt_change"
+                android:id="@+id/stat_gold_change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="+$2,1T"
+                android:text="+0,5%"
                 android:textColor="#94A3B8"
-                android:textSize="9sp"/>
+                android:textSize="8sp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -210,29 +317,29 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:background="@drawable/countdown_box_background"
-            android:padding="8dp"
+            android:padding="6dp"
             android:layout_marginEnd="4dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="S&amp;P 500"
+                android:text="OIL"
                 android:textColor="#94A3B8"
-                android:textSize="9sp"/>
+                android:textSize="8sp"/>
             <TextView
-                android:id="@+id/stat_sp500"
+                android:id="@+id/stat_oil"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="6,827"
+                android:text="$71,2"
                 android:textColor="#22C55E"
-                android:textSize="18sp"
+                android:textSize="14sp"
                 android:textStyle="bold"/>
             <TextView
-                android:id="@+id/stat_sp500_change"
+                android:id="@+id/stat_oil_change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="-1,1%"
+                android:text="-0,3%"
                 android:textColor="#94A3B8"
-                android:textSize="9sp"/>
+                android:textSize="8sp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -241,59 +348,59 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:background="@drawable/countdown_box_background"
-            android:padding="8dp"
+            android:padding="6dp"
             android:layout_marginEnd="4dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="GAS"
+                android:text="UNEMP"
                 android:textColor="#94A3B8"
-                android:textSize="9sp"/>
+                android:textSize="8sp"/>
             <TextView
-                android:id="@+id/stat_gas"
+                android:id="@+id/stat_unemployment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="$3,07"
-                android:textColor="#EF4444"
-                android:textSize="18sp"
+                android:text="4,2%"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
                 android:textStyle="bold"/>
             <TextView
-                android:id="@+id/stat_gas_change"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="$-0.01"
-                android:textColor="#94A3B8"
-                android:textSize="9sp"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:background="@drawable/countdown_box_background"
-            android:padding="8dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="BTC"
-                android:textColor="#94A3B8"
-                android:textSize="9sp"/>
-            <TextView
-                android:id="@+id/stat_bitcoin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="$89K"
-                android:textColor="#22C55E"
-                android:textSize="18sp"
-                android:textStyle="bold"/>
-            <TextView
-                android:id="@+id/stat_bitcoin_change"
+                android:id="@+id/stat_unemployment_change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="+0,1%"
                 android:textColor="#94A3B8"
-                android:textSize="9sp"/>
+                android:textSize="8sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:background="@drawable/countdown_box_background"
+            android:padding="6dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="INFL"
+                android:textColor="#94A3B8"
+                android:textSize="8sp"/>
+            <TextView
+                android:id="@+id/stat_inflation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2,7%"
+                android:textColor="#EF4444"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/stat_inflation_change"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+0,2%"
+                android:textColor="#94A3B8"
+                android:textSize="8sp"/>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

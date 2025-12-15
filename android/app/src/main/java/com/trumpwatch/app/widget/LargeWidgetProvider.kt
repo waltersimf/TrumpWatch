@@ -38,6 +38,7 @@ class LargeWidgetProvider : AppWidgetProvider() {
         private const val COLOR_RED = "#EF4444"
         private const val COLOR_GREEN = "#22C55E"
         private const val COLOR_AMBER = "#F59E0B"
+        private const val COLOR_WHITE = "#FFFFFF"
 
         fun updateWidget(
             context: Context,
@@ -46,53 +47,69 @@ class LargeWidgetProvider : AppWidgetProvider() {
         ) {
             val views = RemoteViews(context.packageName, R.layout.widget_large)
 
-            // Calculate countdown
             val countdown = WidgetUtils.calculateCountdown()
 
-            // Update day text
             val dayText = "Day ${countdown.daysPassed} of ${countdown.totalDays}"
             views.setTextViewText(R.id.widget_day_text, dayText)
 
-            // Update countdown blocks
+            // Countdown without seconds
             views.setTextViewText(R.id.countdown_days, countdown.days.toString())
             views.setTextViewText(R.id.countdown_hours, countdown.hours.toString().padStart(2, '0'))
             views.setTextViewText(R.id.countdown_mins, countdown.minutes.toString().padStart(2, '0'))
-            views.setTextViewText(R.id.countdown_secs, countdown.seconds.toString().padStart(2, '0'))
 
-            // Update progress bar
-            views.setProgressBar(R.id.progress_bar, 100, countdown.percentComplete.toInt(), false)
+            views.setProgressBar(R.id.progress_bar, 1000, (countdown.percentComplete * 10).toInt(), false)
             val progressText = String.format("%.2f%% of term completed", countdown.percentComplete)
             views.setTextViewText(R.id.progress_text, progressText)
 
-            // Fetch market data
             WidgetUtils.fetchMarketData { data ->
-                // Update debt
+                // Row 1: Debt
                 views.setTextViewText(R.id.stat_debt, WidgetUtils.formatDebt(data.nationalDebt))
                 views.setTextViewText(R.id.stat_debt_change, WidgetUtils.formatDebtChangeShort(data.debtChange))
                 views.setTextColor(R.id.stat_debt, Color.parseColor(COLOR_RED))
 
-                // Update S&P 500
+                // Row 1: S&P 500
                 views.setTextViewText(R.id.stat_sp500, WidgetUtils.formatSP500(data.sp500Price))
                 views.setTextViewText(R.id.stat_sp500_change, WidgetUtils.formatPercentShort(data.sp500ChangePercent))
                 val sp500Color = if (WidgetUtils.isPositive(data.sp500ChangePercent)) COLOR_GREEN else COLOR_RED
                 views.setTextColor(R.id.stat_sp500, Color.parseColor(sp500Color))
 
-                // Update Gas Price
+                // Row 1: Gas
                 views.setTextViewText(R.id.stat_gas, WidgetUtils.formatGasPrice(data.gasPrice))
                 views.setTextViewText(R.id.stat_gas_change, WidgetUtils.formatGasChange(data.gasChange))
                 val gasColor = if ((data.gasChange ?: 0.0) <= 0) COLOR_GREEN else COLOR_RED
                 views.setTextColor(R.id.stat_gas, Color.parseColor(gasColor))
 
-                // Update Bitcoin
+                // Row 1: Bitcoin
                 views.setTextViewText(R.id.stat_bitcoin, WidgetUtils.formatBtcPriceShort(data.bitcoinPrice))
                 views.setTextViewText(R.id.stat_bitcoin_change, WidgetUtils.formatPercentShort(data.bitcoinChangePercent))
                 val btcColor = if (WidgetUtils.isPositive(data.bitcoinChangePercent)) COLOR_GREEN else COLOR_AMBER
                 views.setTextColor(R.id.stat_bitcoin, Color.parseColor(btcColor))
 
+                // Row 2: Gold
+                views.setTextViewText(R.id.stat_gold, WidgetUtils.formatGoldPrice(data.goldPrice))
+                views.setTextViewText(R.id.stat_gold_change, WidgetUtils.formatPercentShort(data.goldChangePercent))
+                views.setTextColor(R.id.stat_gold, Color.parseColor(COLOR_AMBER))
+
+                // Row 2: Oil
+                views.setTextViewText(R.id.stat_oil, WidgetUtils.formatOilPrice(data.oilPrice))
+                views.setTextViewText(R.id.stat_oil_change, WidgetUtils.formatPercentShort(data.oilChangePercent))
+                val oilColor = if (WidgetUtils.isPositive(data.oilChangePercent)) COLOR_GREEN else COLOR_RED
+                views.setTextColor(R.id.stat_oil, Color.parseColor(oilColor))
+
+                // Row 2: Unemployment
+                views.setTextViewText(R.id.stat_unemployment, WidgetUtils.formatPercent2(data.unemploymentRate))
+                views.setTextViewText(R.id.stat_unemployment_change, WidgetUtils.formatPercentChangeShort(data.unemploymentChange))
+                views.setTextColor(R.id.stat_unemployment, Color.parseColor(COLOR_WHITE))
+
+                // Row 2: Inflation
+                views.setTextViewText(R.id.stat_inflation, WidgetUtils.formatPercent2(data.inflationRate))
+                views.setTextViewText(R.id.stat_inflation_change, WidgetUtils.formatPercentChangeShort(data.inflationChange))
+                val inflColor = if ((data.inflationRate ?: 0.0) > 3.0) COLOR_RED else COLOR_GREEN
+                views.setTextColor(R.id.stat_inflation, Color.parseColor(inflColor))
+
                 appWidgetManager.updateAppWidget(appWidgetId, views)
             }
 
-            // Set click intent to open app
             val intent = Intent(context, MainActivity::class.java)
             val pendingIntent = PendingIntent.getActivity(
                 context,

@@ -12,12 +12,11 @@
         android:id="@+id/countdown_compact"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="1131d 20h 25m 09s"
+        android:text="1131d 19h 16m"
         android:textColor="#FFFFFF"
         android:textSize="14sp"
         android:textStyle="bold"
-        android:fontFamily="monospace"
-        android:singleLine="true"/>
+        android:fontFamily="monospace"/>
 
     <ProgressBar
         android:id="@+id/progress_bar"
@@ -28,14 +27,13 @@
         android:layout_marginBottom="4dp"
         android:progressDrawable="@drawable/progress_bar_fill"
         android:max="1000"
-        android:progress="220"/>
+        android:progress="225"/>
 
     <TextView
         android:id="@+id/progress_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="22.5% complete"
+        android:text="22,5% complete"
         android:textColor="#94A3B8"
         android:textSize="10sp"/>
-
 </LinearLayout>

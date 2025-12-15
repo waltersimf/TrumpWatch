@@ -42,21 +42,17 @@ class SmallWidgetProvider : AppWidgetProvider() {
         ) {
             val views = RemoteViews(context.packageName, R.layout.widget_small)
 
-            // Calculate countdown
             val countdown = WidgetUtils.calculateCountdown()
 
-            // Format compact countdown: "1131d 20h 25m 09s"
-            val compactCountdown = "${countdown.days}d ${countdown.hours.toString().padStart(2, '0')}h ${countdown.minutes.toString().padStart(2, '0')}m ${countdown.seconds.toString().padStart(2, '0')}s"
+            // Format compact countdown without seconds: "1131d 19h 16m"
+            val compactCountdown = "${countdown.days}d ${countdown.hours.toString().padStart(2, '0')}h ${countdown.minutes.toString().padStart(2, '0')}m"
             views.setTextViewText(R.id.countdown_compact, compactCountdown)
 
-            // Update progress bar (max 1000 for precision)
             views.setProgressBar(R.id.progress_bar, 1000, (countdown.percentComplete * 10).toInt(), false)
 
-            // Update progress text
             val progressText = String.format("%.1f%% complete", countdown.percentComplete)
             views.setTextViewText(R.id.progress_text, progressText)
 
-            // Set click intent to open app
             val intent = Intent(context, MainActivity::class.java)
             val pendingIntent = PendingIntent.getActivity(
                 context,
