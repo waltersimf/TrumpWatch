@@ -157,23 +157,23 @@ object WidgetUtils {
                 gasPrice = 2.95
             }
 
-            // Fetch Bitcoin - Primary: CoinGecko
+            // Fetch Bitcoin
             try {
                 val btcUrl = URL("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true")
                 val btcConn = btcUrl.openConnection() as HttpURLConnection
-                btcConn.connectTimeout = 5000
-                btcConn.readTimeout = 5000
+                btcConn.connectTimeout = 3000
+                btcConn.readTimeout = 3000
+                btcConn.setRequestProperty("User-Agent", "Mozilla/5.0")
                 val btcResponse = btcConn.inputStream.bufferedReader().readText()
                 val btcJson = JSONObject(btcResponse).getJSONObject("bitcoin")
                 btc = btcJson.getDouble("usd")
                 btcChange = btcJson.getDouble("usd_24h_change")
             } catch (e: Exception) {
-                // Fallback: CoinCap API
                 try {
                     val fallbackUrl = URL("https://api.coincap.io/v2/assets/bitcoin")
                     val fallbackConn = fallbackUrl.openConnection() as HttpURLConnection
-                    fallbackConn.connectTimeout = 5000
-                    fallbackConn.readTimeout = 5000
+                    fallbackConn.connectTimeout = 3000
+                    fallbackConn.readTimeout = 3000
                     val fallbackResponse = fallbackConn.inputStream.bufferedReader().readText()
                     val fallbackJson = JSONObject(fallbackResponse).getJSONObject("data")
                     btc = fallbackJson.getString("priceUsd").toDoubleOrNull()
