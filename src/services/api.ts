@@ -15,14 +15,13 @@ const TERM_START_DATE = '2025-01-20';
 const GAS_BASELINE_JAN20 = 3.08;
 const BITCOIN_BASELINE_JAN20 = 101000;
 const GOLD_BASELINE_JAN20 = 2750;
+const FRED_API_KEY = '82376aa22a515252bb9e18ddd772b3e0';
 
 // API Endpoints
 const TREASURY_API = 'https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v2/accounting/od/debt_to_penny';
 const FEDERAL_REGISTER_API = 'https://www.federalregister.gov/api/v1/documents.json';
 const QUOTE_API = 'https://api.tronalddump.io/random/quote';
 const EIA_GAS_API = 'https://api.eia.gov/v2/petroleum/pri/gnd/data/';
-const COINGECKO_API = 'https://api.coingecko.com/api/v3/simple/price';
-const METALS_API = 'https://api.metals.dev/v1/latest';
 
 // ============ FETCH FUNCTIONS ============
 
@@ -80,16 +79,15 @@ export const fetchExecutiveOrdersCount = async (): Promise<number> => {
 
 export const fetchSP500 = async (): Promise<SP500Data> => {
   try {
-    const res = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/SPY?interval=1d&range=1d');
+    const res = await fetch(`https://api.stlouisfed.org/fred/series/observations?series_id=SP500&api_key=${FRED_API_KEY}&file_type=json&limit=2&sort_order=desc`);
     const json = await res.json();
-    const quote = json.chart?.result?.[0]?.meta;
-    const currentPrice = (quote?.regularMarketPrice || 0) * 10;
-    const previousClose = (quote?.previousClose || currentPrice) * 10;
-    
+    const current = parseFloat(json.observations?.[0]?.value || '0');
+    const prev = parseFloat(json.observations?.[1]?.value || current.toString());
+    const changePercent = prev > 0 ? ((current - prev) / prev) * 100 : 0;
     return {
-      value: currentPrice,
-      change: currentPrice - previousClose,
-      changePercent: ((currentPrice - previousClose) / previousClose) * 100
+      value: current,
+      change: current - prev,
+      changePercent: changePercent
     };
   } catch {
     return { value: 5950, change: 0, changePercent: 0 };
@@ -98,12 +96,14 @@ export const fetchSP500 = async (): Promise<SP500Data> => {
 
 export const fetchBitcoin = async (): Promise<BitcoinData> => {
   try {
-    const res = await fetch(`${COINGECKO_API}?ids=bitcoin&vs_currencies=usd&include_24hr_change=true`);
+    const res = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');
     const json = await res.json();
+    const price = parseFloat(json.lastPrice) || 0;
+    const changePercent = parseFloat(json.priceChangePercent) || 0;
     return {
-      value: json.bitcoin?.usd || 0,
-      change: (json.bitcoin?.usd || 0) - BITCOIN_BASELINE_JAN20,
-      changePercent: json.bitcoin?.usd_24h_change || 0
+      value: price,
+      change: price - BITCOIN_BASELINE_JAN20,
+      changePercent: changePercent
     };
   } catch {
     return { value: 100000, change: 0, changePercent: 0 };
@@ -112,13 +112,14 @@ export const fetchBitcoin = async (): Promise<BitcoinData> => {
 
 export const fetchGold = async (): Promise<GoldData> => {
   try {
-    const res = await fetch(`${METALS_API}?api_key=demo&base=USD&currencies=XAU`);
+    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tether-gold&vs_currencies=usd&include_24hr_change=true');
     const json = await res.json();
-    const goldPrice = json.rates?.XAU ? (1 / json.rates.XAU) : 2650;
+    const goldPrice = json['tether-gold']?.usd || 2650;
+    const change = json['tether-gold']?.usd_24h_change || 0;
     return {
       value: goldPrice,
       change: goldPrice - GOLD_BASELINE_JAN20,
-      changePercent: 0
+      changePercent: change
     };
   } catch {
     return { value: 2650, change: 0, changePercent: 0 };
@@ -127,7 +128,7 @@ export const fetchGold = async (): Promise<GoldData> => {
 
 export const fetchUnemployment = async (): Promise<UnemploymentData> => {
   try {
-    const res = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=UNRATE&api_key=82376aa22a515252bb9e18ddd772b3e0&file_type=json&limit=2&sort_order=desc');
+    const res = await fetch(`https://api.stlouisfed.org/fred/series/observations?series_id=UNRATE&api_key=${FRED_API_KEY}&file_type=json&limit=2&sort_order=desc`);
     const json = await res.json();
     const current = parseFloat(json.observations?.[0]?.value || '0');
     const prev = parseFloat(json.observations?.[1]?.value || current.toString());
@@ -139,12 +140,17 @@ export const fetchUnemployment = async (): Promise<UnemploymentData> => {
 
 export const fetchInflation = async (): Promise<InflationData> => {
   try {
-    const res = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&api_key=82376aa22a515252bb9e18ddd772b3e0&file_type=json&limit=13&sort_order=desc');
+    const res = await fetch(`https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&api_key=${FRED_API_KEY}&file_type=json&limit=14&sort_order=desc`);
     const json = await res.json();
     const current = parseFloat(json.observations?.[0]?.value || '0');
     const yearAgo = parseFloat(json.observations?.[12]?.value || current.toString());
     const rate = ((current - yearAgo) / yearAgo) * 100;
-    return { value: rate, change: 0 };
+    
+    const prevMonth = parseFloat(json.observations?.[1]?.value || '0');
+    const prevYearAgo = parseFloat(json.observations?.[13]?.value || prevMonth.toString());
+    const prevRate = ((prevMonth - prevYearAgo) / prevYearAgo) * 100;
+    
+    return { value: rate, change: rate - prevRate };
   } catch {
     return { value: 2.7, change: 0 };
   }
