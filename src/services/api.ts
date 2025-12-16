@@ -126,12 +126,28 @@ export const fetchGold = async (): Promise<GoldData> => {
 };
 
 export const fetchUnemployment = async (): Promise<UnemploymentData> => {
-  // Mock data implies change is 0 or undefined (optional in updated types)
-  return { value: 4.1, change: 0 };
+  try {
+    const res = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=UNRATE&api_key=82376aa22a515252bb9e18ddd772b3e0&file_type=json&limit=2&sort_order=desc');
+    const json = await res.json();
+    const current = parseFloat(json.observations?.[0]?.value || '0');
+    const prev = parseFloat(json.observations?.[1]?.value || current.toString());
+    return { value: current, change: current - prev };
+  } catch {
+    return { value: 4.2, change: 0 };
+  }
 };
 
 export const fetchInflation = async (): Promise<InflationData> => {
-  return { value: 2.9, change: 0 };
+  try {
+    const res = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&api_key=82376aa22a515252bb9e18ddd772b3e0&file_type=json&limit=13&sort_order=desc');
+    const json = await res.json();
+    const current = parseFloat(json.observations?.[0]?.value || '0');
+    const yearAgo = parseFloat(json.observations?.[12]?.value || current.toString());
+    const rate = ((current - yearAgo) / yearAgo) * 100;
+    return { value: rate, change: 0 };
+  } catch {
+    return { value: 2.7, change: 0 };
+  }
 };
 
 export const fetchRandomQuote = async (): Promise<QuoteData> => {
