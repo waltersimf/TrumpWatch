@@ -1,36 +1,38 @@
-# TrumpWatch 🇺🇸
+# TrumpWatch
 
-A real-time dashboard tracking the Trump presidency with live data from official government sources.
+TrumpWatch is a dashboard that tracks the current U.S. presidential term through **20 January 2029**. It combines a live countdown, FRED economic indicators, Trump-related news, verified quotes, government metrics, API health, and operational notifications.
 
-## Features
+## Repository layout
 
-- ⏱️ **Countdown Timer** - Days, hours, minutes, seconds until end of term
-- 💰 **National Debt Tracker** - Live data from U.S. Treasury
-- 📜 **Executive Orders** - Count from Federal Register
-- 💬 **Quote of the Day** - Random Trump quotes
-- 📱 **Truth Social** - Latest posts (when available)
+| Path | Purpose |
+|---|---|
+| `client/` | React 19 and Tailwind web dashboard |
+| `server/` | Express and tRPC backend, external-data services, and API health logic |
+| `drizzle/` | MySQL/TiDB schema for metrics, news, quotes, statuses, and reports |
+| `shared/` | Shared application constants and types |
+| `mobile-android/` | Native Expo/React Native Android application, home-screen widgets, background refresh, and Android tests |
 
-## Data Sources
+## Web application
 
-All data comes from free, public APIs:
-- [U.S. Treasury Fiscal Data](https://fiscaldata.treasury.gov/)
-- [Federal Register API](https://www.federalregister.gov/developers)
-- [TronaldDump API](https://tronalddump.io/)
-- [Truth Social Archive](https://github.com/stiles/trump-truth-social-archive)
-
-## Development
+The web application uses React 19, Tailwind 4, Express 4, tRPC 11, Drizzle ORM, and Vitest.
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
+pnpm test
 ```
 
-## Deploy
+The backend keeps quotes truthful: technical fallback strings are not displayed as quotes. Dashboard news is restricted to records that explicitly mention Trump, while government metrics use canonical Treasury and Census source pages.
 
-Works out of the box with Vercel:
+## Android application
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+The Android source is intentionally kept in `mobile-android/` so it can evolve independently from the web deployment.
 
-## License
+```bash
+cd mobile-android
+npm install
+npm run check
+npm test
+```
 
-MIT
+The mobile application reads the production tRPC dashboard contract, renders the overview and news sections, supports quote copying and refresh, and includes countdown and economic home-screen widgets.

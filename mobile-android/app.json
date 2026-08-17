@@ -1,0 +1,72 @@
+{
+  "expo": {
+    "name": "TrumpWatch",
+    "slug": "trumpwatch",
+    "owner": "waltersimf",
+    "version": "1.0.0",
+    "extra": {
+      "dashboardApiBaseUrl": "https://trumpdash-njn2ba2j.manus.space",
+      "eas": {
+        "projectId": "e7831f00-229d-4960-b5b5-4bc874fbd083"
+      }
+    },
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "space.manus.trumpwatch",
+      "permissions": [
+        "android.permission.INTERNET"
+      ],
+      "adaptiveIcon": {
+        "backgroundColor": "#07111F",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "CountdownWidget",
+              "label": "TrumpWatch: відлік",
+              "description": "Кількість днів до 20 січня 2029 року",
+              "minWidth": "180dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 3,
+              "targetCellHeight": 2,
+              "maxResizeWidth": "360dp",
+              "maxResizeHeight": "180dp",
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 3600000
+            },
+            {
+              "name": "EconomyWidget",
+              "label": "TrumpWatch: економіка",
+              "description": "Ключові економічні показники TrumpWatch",
+              "minWidth": "220dp",
+              "minHeight": "140dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 3,
+              "maxResizeWidth": "420dp",
+              "maxResizeHeight": "240dp",
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 3600000
+            }
+          ]
+        }
+      ],
+      "expo-background-task"
+    ],
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

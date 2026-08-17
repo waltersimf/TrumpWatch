@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1765532943418,
+      "tag": "0000_blue_tiger_shark",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1765533134590,
+      "tag": "0001_milky_paper_doll",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1786663729255,
+      "tag": "0002_greedy_quentin_quire",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1786667278934,
+      "tag": "0003_open_gabe_jones",
+      "breakpoints": true
+    }
+  ]
+}
