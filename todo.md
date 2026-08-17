@@ -248,3 +248,10 @@
 - [x] Prepare the current web and Android source changes for a safe GitHub update
 - [x] Push the approved current version to GitHub and verify the remote commit
 - [x] Replace the outdated GitHub `main` structure with current TrumpWatch web and Android source code
+
+## Android Production Data Verification
+- [x] Diagnose the persisted API-status, quotes, and government-metrics production state used by Android
+- [x] Correct quote API status naming, remove technical quote fallbacks, and restore government-metrics reads
+- [x] Verify the published dashboard API returns a verified quote, government metrics, and all Android status keys
+- [x] Build and publish a new Android APK from the verified data contract
+- [ ] Verify the new Android APK on the user's device

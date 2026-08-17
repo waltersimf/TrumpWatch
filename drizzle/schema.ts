@@ -137,7 +137,7 @@ export type InsertGovernmentMetric = typeof governmentMetrics.$inferInsert;
  */
 export const apiStatus = mysqlTable("api_status", {
   id: int("id").autoincrement().primaryKey(),
-  apiName: varchar("apiName", { length: 64 }).notNull(), // e.g., "FRED", "NewsAPI", "TronaldDump"
+  apiName: varchar("apiName", { length: 64 }).notNull(), // e.g., "FRED", "NewsAPI", "TrumpQuotesAPI"
   status: mysqlEnum("status", ["healthy", "degraded", "failed"]).default("healthy").notNull(),
   lastSuccessfulFetch: timestamp("lastSuccessfulFetch"),
   lastFailedFetch: timestamp("lastFailedFetch"),

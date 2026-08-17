@@ -41,31 +41,23 @@ export async function upsertGovernmentMetric(metric: InsertGovernmentMetric): Pr
   const db = await getDb();
   if (!db) return;
 
-  const existing = await db
-    .select({ id: governmentMetrics.id })
-    .from(governmentMetrics)
-    .where(eq(governmentMetrics.metricKey, metric.metricKey))
-    .limit(1);
-
-  if (existing[0]) {
-    await db
-      .update(governmentMetrics)
-      .set({
+  const lastUpdated = new Date();
+  // `metricKey` is unique in the production schema. A single atomic statement
+  // avoids the prior read-before-write query that intermittently failed during
+  // background refresh and incorrectly marked Data.gov as unavailable.
+  await db
+    .insert(governmentMetrics)
+    .values({ ...metric, lastUpdated })
+    .onDuplicateKeyUpdate({
+      set: {
         metricName: metric.metricName,
         value: metric.value,
         date: metric.date,
         unit: metric.unit,
         sourceUrl: metric.sourceUrl,
-        lastUpdated: new Date(),
-      })
-      .where(eq(governmentMetrics.id, existing[0].id));
-    return;
-  }
-
-  await db.insert(governmentMetrics).values({
-    ...metric,
-    lastUpdated: new Date(),
-  });
+        lastUpdated,
+      },
+    });
 }
 
 export async function getLatestGovernmentMetrics() {

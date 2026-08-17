@@ -4,7 +4,9 @@ import { buildCountdown, extractQuoteRefreshResult, normalizeDashboardPayload, n
 
 export type { DashboardSnapshot, MetricCard, NewsArticle, TrumpQuote, GovernmentMetric, DashboardNotification, ApiHealth, QuoteRefreshResult } from './transform';
 
-const CACHE_KEY = 'trumpwatch.dashboard.snapshot.v4';
+// Bump this whenever the live dashboard contract is repaired so an existing
+// installation never reuses an incomplete cached response from an older APK.
+const CACHE_KEY = 'trumpwatch.dashboard.snapshot.v5';
 const DASHBOARD_API_BASE_URL = (Constants.expoConfig?.extra?.dashboardApiBaseUrl as string | undefined) ?? 'https://trumpdash-njn2ba2j.manus.space';
 
 function trpcUrl(procedure: string, input?: Record<string, unknown>) {
