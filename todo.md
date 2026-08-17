@@ -244,7 +244,7 @@
 - [x] Verify the published domain response exposes government metrics and all Android status keys after publication
 
 ## GitHub Synchronization
-- [ ] Find and compare the current TrumpWatch project with the correct GitHub repository
-- [ ] Prepare the current web and Android source changes for a safe GitHub update
-- [ ] Push the approved current version to GitHub and verify the remote commit
-- [ ] Replace the outdated GitHub `main` structure with current TrumpWatch web and Android source code
+- [x] Find and compare the current TrumpWatch project with the correct GitHub repository
+- [x] Prepare the current web and Android source changes for a safe GitHub update
+- [x] Push the approved current version to GitHub and verify the remote commit
+- [x] Replace the outdated GitHub `main` structure with current TrumpWatch web and Android source code
