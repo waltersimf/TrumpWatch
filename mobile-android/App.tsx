@@ -1,81 +1,177 @@
+import Constants from 'expo-constants';
 import { StatusBar } from 'expo-status-bar';
-import * as Clipboard from 'expo-clipboard';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Linking, Pressable, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { getDashboardSnapshot, getEconomicHighlights, getNewsArticles, refreshQuote, reportBrokenLink, type DashboardSnapshot, type NewsArticle, type TrumpQuote } from './src/data/dashboard';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  BackHandler,
+  Linking,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { WebView, type WebViewNavigation } from 'react-native-webview';
 import { registerDashboardBackgroundRefresh } from './src/background/task';
+import { PRODUCTION_WEB_URL } from './src/config/production';
+import { getDashboardSnapshot } from './src/data/dashboard';
+import { classifyWebNavigation } from './src/web/navigation';
 import { refreshHomeWidgets } from './src/widgets/register';
 
-type Tab = 'dashboard' | 'news';
-const TERM_START = new Date('2025-01-20T00:00:00.000Z').getTime();
-const TERM_END = new Date('2029-01-20T17:00:00.000Z').getTime();
-const isSafeUrl = (value: string) => /^https?:\/\/(?!.*(?:example\.com|localhost|\.test|\.invalid))/i.test(value);
-const dateLabel = (date: string | null | undefined) => date ? new Date(date).toLocaleDateString('uk-UA', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Дата не вказана';
-const unitLabel = (unit: string | null) => !unit ? '' : unit.toLowerCase() === 'percent' ? '%' : unit;
-
-function SectionTitle({ eyebrow, title, action }: { eyebrow?: string; title: string; action?: React.ReactNode }) {
-  return <View style={styles.sectionHeader}><View style={styles.sectionTitleBox}>{eyebrow ? <Text style={styles.sectionKicker}>{eyebrow}</Text> : null}<Text accessibilityRole="header" style={styles.sectionTitle}>{title}</Text></View>{action}</View>;
+function LoadingView() {
+  return (
+    <View style={styles.centeredSurface}>
+      <ActivityIndicator color="#3B82F6" size="large" />
+    </View>
+  );
 }
 
-function SourceStatus({ name, status }: { name: string; status?: { status: string } | null }) {
-  const current = status?.status ?? 'unknown'; const bad = current === 'failed'; const warn = current === 'degraded';
-  return <View style={styles.statusRow}><View style={[styles.statusDot, bad && styles.statusBad, warn && styles.statusWarn]} /><Text style={styles.statusName}>{name}</Text><Text style={[styles.statusValue, bad && styles.statusTextBad, warn && styles.statusTextWarn]}>{current.toUpperCase()}</Text></View>;
+function LoadErrorView({ onRetry }: { onRetry: () => void }) {
+  return (
+    <View style={styles.centeredSurface}>
+      <Text accessibilityRole="header" style={styles.errorTitle}>
+        Unable to load TrumpWatch
+      </Text>
+      <Text style={styles.errorMessage}>
+        Check your connection and try again.
+      </Text>
+      <Pressable accessibilityRole="button" onPress={onRetry} style={styles.retryButton}>
+        <Text style={styles.retryLabel}>Retry</Text>
+      </Pressable>
+    </View>
+  );
 }
 
 export default function App() {
-  const [snapshot, setSnapshot] = useState<DashboardSnapshot | null>(null);
-  const [activeTab, setActiveTab] = useState<Tab>('dashboard');
-  const [isRefreshing, setIsRefreshing] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [news, setNews] = useState<NewsArticle[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searching, setSearching] = useState(false);
-  const [quote, setQuote] = useState<TrumpQuote | null>(null);
-  const [quoteBusy, setQuoteBusy] = useState(false);
+  const webViewRef = useRef<WebView>(null);
+  const [canGoBack, setCanGoBack] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [webViewKey, setWebViewKey] = useState(0);
 
-  const refresh = useCallback(async () => {
-    setIsRefreshing(true); setErrorMessage(null);
-    try { const next = await getDashboardSnapshot(); setSnapshot(next); setNews(next.news); setQuote(next.quote); await refreshHomeWidgets(next); }
-    catch (error) { setErrorMessage(error instanceof Error ? error.message : 'Не вдалося оновити дані.'); }
-    finally { setIsRefreshing(false); }
+  useEffect(() => {
+    void registerDashboardBackgroundRefresh().catch((error) => {
+      console.warn('[Widgets] Background refresh registration failed', error);
+    });
+
+    // The main activity renders the canonical production web product. This
+    // separate native fetch exists only to keep home-screen widgets current.
+    void getDashboardSnapshot()
+      .then(refreshHomeWidgets)
+      .catch((error) => {
+        console.warn('[Widgets] Initial refresh failed', error);
+      });
   }, []);
-  useEffect(() => { void refresh(); void registerDashboardBackgroundRefresh(); }, [refresh]);
 
-  const handleNewsSearch = async () => { setSearching(true); try { setNews(await getNewsArticles(searchQuery.trim())); } catch { Alert.alert('Новини недоступні', 'Не вдалося виконати пошук. Спробуйте пізніше.'); } finally { setSearching(false); } };
-  const handleQuoteRefresh = async () => { setQuoteBusy(true); try { const result = await refreshQuote(); if (result.quote) { setQuote(result.quote); if (!result.refreshed) Alert.alert('Показано перевірену цитату', 'Нову цитату тимчасово не отримано, тому показано останню перевірену версію.'); } else Alert.alert('Цитата недоступна', 'Джерело не повернуло перевірену цитату.'); } catch { Alert.alert('Помилка оновлення', 'Не вдалося отримати перевірену цитату.'); } finally { setQuoteBusy(false); } };
-  const handleCopy = async () => { if (!quote) return; await Clipboard.setStringAsync(quote.quoteText); Alert.alert('Скопійовано', 'Цитату додано до буфера обміну.'); };
-  const progress = useMemo(() => Math.max(0, Math.min(1, (Date.now() - TERM_START) / (TERM_END - TERM_START))), []);
-  const metrics = snapshot ? getEconomicHighlights(snapshot) : [];
-  const safeNews = news.filter((article) => isSafeUrl(article.url));
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (!canGoBack) return false;
+      webViewRef.current?.goBack();
+      return true;
+    });
 
-  const overview = <>
-    <View style={styles.heroCard}><View style={styles.flagLine}><View style={styles.redLine} /><View style={styles.whiteLine} /><View style={styles.blueLine} /></View><View style={styles.heroHeader}><View><Text style={styles.heroEyebrow}>ПРЕЗИДЕНТСЬКИЙ ТЕРМІН</Text><Text style={styles.heroTitle}>Відлік до 20.01.2029</Text></View><Text style={styles.progressLabel}>{Math.round(progress * 100)}%</Text></View><View style={styles.progressTrack}><View style={[styles.progressFill, { width: `${progress * 100}%` }]} /></View><View style={styles.countdownGrid}><View style={[styles.timeCell, styles.daysCell]}><Text style={styles.daysValue}>{snapshot?.countdown.daysRemaining ?? '—'}</Text><Text style={styles.timeLabel}>ДНІВ</Text></View><View style={styles.timeCell}><Text style={styles.timeValue}>{String(snapshot?.countdown.hoursRemaining ?? '—').padStart(2, '0')}</Text><Text style={styles.timeLabel}>ГОДИН</Text></View><View style={[styles.timeCell, styles.minutesCell]}><Text style={styles.timeValue}>{String(snapshot?.countdown.minutesRemaining ?? '—').padStart(2, '0')}</Text><Text style={styles.timeLabel}>ХВИЛИН</Text></View></View></View>
-    <SectionTitle eyebrow="FRED / LATEST OBSERVATION" title="Економічні показники" action={<Pressable disabled={isRefreshing} onPress={refresh} style={styles.actionButton}><Text style={styles.actionLabel}>{isRefreshing ? 'ОНОВЛЮЄМО' : 'ОНОВИТИ'}</Text></Pressable>} />
-    <View style={styles.metricGrid}>{metrics.map((metric, index) => <View key={metric.key} style={[styles.metricCard, index === 0 && styles.metricCardRed]}><Text style={styles.metricName} numberOfLines={2}>{metric.label}</Text><Text style={styles.metricValue}>{metric.value ?? '—'}</Text><Text style={styles.metricUnit}>{metric.value ? unitLabel(metric.unit) || 'Без одиниці виміру' : 'Очікуємо дані'}</Text><Text style={styles.metricDate}>{metric.value ? `Станом на ${dateLabel(metric.date)}` : 'Після оновлення джерела'}</Text></View>)}</View>
-    <SectionTitle eyebrow="DATA.GOV / TREASURY" title="Урядові дані" />
-    <View style={styles.governmentStack}>{snapshot?.governmentMetrics.length ? snapshot.governmentMetrics.map((metric) => <Pressable key={metric.key} disabled={!metric.sourceUrl} onPress={() => metric.sourceUrl && Linking.openURL(metric.sourceUrl)} style={styles.governmentCard}><View style={styles.governmentTop}><Text style={styles.governmentName}>{metric.name}</Text>{metric.sourceUrl ? <Text style={styles.linkGlyph}>↗</Text> : null}</View><Text style={styles.governmentValue}>{metric.value}</Text><Text style={styles.governmentMeta}>{unitLabel(metric.unit)} · {dateLabel(metric.date)}</Text></Pressable>) : <View style={styles.emptyCard}><Text style={styles.emptyText}>Урядові показники ще не завантажено.</Text></View>}</View>
-    <SectionTitle eyebrow="VERIFIED QUOTE" title="Цитата Трампа" action={<Pressable disabled={quoteBusy} onPress={handleQuoteRefresh} style={styles.outlineButton}><Text style={styles.outlineLabel}>{quoteBusy ? '…' : 'НОВА'}</Text></Pressable>} />
-    <View style={styles.quoteCard}>{quote ? <><Text style={styles.quoteMark}>“</Text><Text style={styles.quoteText}>{quote.quoteText}</Text><Text style={styles.quoteMeta}>{quote.source ?? 'Перевірене джерело'} · {dateLabel(quote.date)}</Text><Pressable onPress={handleCopy} style={styles.copyButton}><Text style={styles.copyLabel}>КОПІЮВАТИ ЦИТАТУ</Text></Pressable></> : <Text style={styles.emptyText}>Перевірена цитата зараз недоступна.</Text>}</View>
-    <SectionTitle eyebrow="SYSTEM HEALTH" title="Статус джерел" />
-    <View style={styles.statusCard}><SourceStatus name="FRED API" status={snapshot?.apiStatus.fred} /><SourceStatus name="NewsAPI" status={snapshot?.apiStatus.newsApi} /><SourceStatus name="Trump Quotes" status={snapshot?.apiStatus.quotesApi} /><SourceStatus name="Data.gov" status={snapshot?.apiStatus.dataGov} /></View>
-    <SectionTitle eyebrow="ALERT CENTER" title="Сповіщення" />
-    <View style={styles.alertCard}>{snapshot?.notifications.length ? snapshot.notifications.slice(0, 5).map((item) => <View key={item.id} style={styles.alertRow}><Text style={styles.alertIcon}>!</Text><View style={styles.alertBody}><Text style={styles.alertTitle}>{item.title}</Text><Text style={styles.alertMessage}>{item.message}</Text><Text style={styles.alertDate}>{dateLabel(item.createdAt)}</Text></View></View>) : <Text style={styles.emptyText}>Відлік і API-джерела працюють у штатному режимі.</Text>}</View>
-  </>;
-  const newsTab = <><SectionTitle eyebrow="NEWSAPI / TRUMP ONLY" title="Політичні новини" /><View style={styles.searchRow}><TextInput value={searchQuery} onChangeText={setSearchQuery} onSubmitEditing={handleNewsSearch} placeholder="Пошук новин…" placeholderTextColor="#70819A" style={styles.searchInput} /><Pressable onPress={handleNewsSearch} style={styles.searchButton}><Text style={styles.searchLabel}>{searching ? '…' : 'ПОШУК'}</Text></Pressable></View><View style={styles.newsStack}>{searching ? <View style={styles.loadingCard}><ActivityIndicator color="#60A5FA" /><Text style={styles.loadingText}>Шукаємо новини…</Text></View> : safeNews.length ? safeNews.map((article) => <View key={article.id} style={styles.newsCard}><View style={styles.newsHeader}><View style={styles.newsSource}><Text style={styles.newsSourceText}>{article.source}</Text></View><Text style={styles.newsDate}>{dateLabel(article.publishedAt)}</Text></View><Text style={styles.newsTitle}>{article.title}</Text>{article.summary ? <View style={styles.summaryBox}><Text style={styles.summaryLabel}>AI SUMMARY</Text><Text style={styles.summaryText}>{article.summary}</Text></View> : article.description ? <Text style={styles.newsDescription}>{article.description}</Text> : null}<View style={styles.newsActions}><Pressable onPress={() => Linking.openURL(article.url)} style={styles.newsAction}><Text style={styles.newsActionLabel}>ВІДКРИТИ ↗</Text></Pressable><Pressable onPress={async () => { try { await reportBrokenLink(article.id, article.url); Alert.alert('Дякуємо', 'Повідомлення про посилання збережено для перевірки.'); } catch { Alert.alert('Помилка', 'Не вдалося надіслати повідомлення.'); } }} style={styles.reportAction}><Text style={styles.reportLabel}>ПОВІДОМИТИ ПРО ПОСИЛАННЯ</Text></Pressable></View></View>) : <View style={styles.emptyCard}><Text style={styles.emptyText}>За цим запитом новин не знайдено.</Text></View>}</View></>;
+    return () => subscription.remove();
+  }, [canGoBack]);
 
-  return <SafeAreaView style={styles.safeArea}><StatusBar style="light" /><View style={styles.topbar}><View><Text style={styles.kicker}>PRESIDENCY DASHBOARD</Text><Text accessibilityRole="header" style={styles.wordmark}>TRUMPWATCH</Text></View><View style={[styles.liveChip, snapshot?.source === 'cache' && styles.cacheChip]}><View style={styles.liveDot} /><Text style={styles.liveLabel}>{snapshot?.source === 'live' ? 'LIVE DATA' : snapshot ? 'CACHED' : 'CONNECTING'}</Text></View></View><View style={styles.tabs}><Pressable onPress={() => setActiveTab('dashboard')} style={[styles.tab, activeTab === 'dashboard' && styles.tabActive]}><Text style={[styles.tabLabel, activeTab === 'dashboard' && styles.tabLabelActive]}>ОГЛЯД</Text></Pressable><Pressable onPress={() => setActiveTab('news')} style={[styles.tab, activeTab === 'news' && styles.tabActive]}><Text style={[styles.tabLabel, activeTab === 'news' && styles.tabLabelActive]}>НОВИНИ</Text></Pressable></View><ScrollView contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refresh} tintColor="#F8FAFC" />}>{errorMessage ? <View style={styles.errorCard}><Text style={styles.errorTitle}>Дані тимчасово недоступні</Text><Text style={styles.errorText}>{errorMessage}</Text></View> : null}{isRefreshing && !snapshot ? <View style={styles.loadingCard}><ActivityIndicator color="#60A5FA" /><Text style={styles.loadingText}>Синхронізуємо дані…</Text></View> : activeTab === 'dashboard' ? overview : newsTab}<Text style={styles.footer}>TrumpWatch · Оновлено {snapshot ? new Date(snapshot.updatedAt).toLocaleString('uk-UA') : '—'}</Text></ScrollView></SafeAreaView>;
+  const handleNavigationRequest = useCallback((request: WebViewNavigation) => {
+    const action = classifyWebNavigation(request.url, PRODUCTION_WEB_URL);
+    if (action === 'allow') return true;
+
+    if (action === 'external') {
+      void Linking.openURL(request.url).catch((error) => {
+        console.warn('[WebView] Unable to open external link', error);
+      });
+    }
+
+    return false;
+  }, []);
+
+  const retry = useCallback(() => {
+    setLoadFailed(false);
+    setCanGoBack(false);
+    setWebViewKey((current) => current + 1);
+  }, []);
+
+  return (
+    <View style={styles.appSurface}>
+      <StatusBar style="light" />
+      {loadFailed ? (
+        <LoadErrorView onRetry={retry} />
+      ) : (
+        <WebView
+          key={webViewKey}
+          ref={webViewRef}
+          source={{ uri: PRODUCTION_WEB_URL }}
+          style={styles.webView}
+          containerStyle={styles.webViewContainer}
+          originWhitelist={['http://*', 'https://*']}
+          startInLoadingState
+          renderLoading={LoadingView}
+          onError={() => setLoadFailed(true)}
+          onHttpError={(event) => {
+            const failedUrl = event.nativeEvent.url.replace(/\/+$/, '');
+            const productionUrl = PRODUCTION_WEB_URL.replace(/\/+$/, '');
+            if (failedUrl === productionUrl && event.nativeEvent.statusCode >= 400) {
+              setLoadFailed(true);
+            }
+          }}
+          onNavigationStateChange={(navigation) => setCanGoBack(navigation.canGoBack)}
+          onShouldStartLoadWithRequest={handleNavigationRequest}
+          setSupportMultipleWindows={false}
+          javaScriptEnabled
+          domStorageEnabled
+          thirdPartyCookiesEnabled
+          sharedCookiesEnabled
+          mixedContentMode="never"
+          allowsBackForwardNavigationGestures
+          allowsLinkPreview={false}
+        />
+      )}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#050B16' }, container: { flexGrow: 1, padding: 18, paddingBottom: 42 }, topbar: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 18, paddingTop: 12 }, kicker: { color: '#8494AC', fontSize: 10, fontWeight: '800', letterSpacing: 1.3 }, wordmark: { color: '#F8FAFC', fontSize: 27, fontWeight: '900', letterSpacing: 0.7, marginTop: 3 }, liveChip: { alignItems: 'center', backgroundColor: '#0A2540', borderColor: '#164E8C', borderRadius: 99, borderWidth: 1, flexDirection: 'row', gap: 6, paddingHorizontal: 10, paddingVertical: 7 }, cacheChip: { backgroundColor: '#1D293B', borderColor: '#52637A' }, liveDot: { backgroundColor: '#60A5FA', borderRadius: 99, height: 6, width: 6 }, liveLabel: { color: '#CFE5FF', fontSize: 9, fontWeight: '900', letterSpacing: 0.8 },
-  tabs: { flexDirection: 'row', marginHorizontal: 18, marginTop: 18, borderBottomColor: '#20334F', borderBottomWidth: 1 }, tab: { flex: 1, alignItems: 'center', paddingBottom: 11 }, tabActive: { borderBottomColor: '#F87171', borderBottomWidth: 2 }, tabLabel: { color: '#75869E', fontSize: 11, fontWeight: '900', letterSpacing: 1 }, tabLabelActive: { color: '#F8FAFC' },
-  heroCard: { backgroundColor: '#101D33', borderColor: '#304766', borderRadius: 22, borderWidth: 1, marginTop: 18, overflow: 'hidden', padding: 18 }, flagLine: { flexDirection: 'row', height: 4, marginBottom: 18 }, redLine: { backgroundColor: '#DC2626', flex: 1 }, whiteLine: { backgroundColor: '#F8FAFC', flex: 1 }, blueLine: { backgroundColor: '#2563EB', flex: 1 }, heroHeader: { alignItems: 'flex-start', flexDirection: 'row', justifyContent: 'space-between' }, heroEyebrow: { color: '#F87171', fontSize: 10, fontWeight: '900', letterSpacing: 1.05 }, heroTitle: { color: '#E8EEF8', fontSize: 17, fontWeight: '800', marginTop: 5 }, progressLabel: { color: '#94A3B8', fontSize: 15, fontWeight: '900' }, progressTrack: { backgroundColor: '#263851', borderRadius: 99, height: 7, marginTop: 16, overflow: 'hidden' }, progressFill: { backgroundColor: '#D94646', borderRadius: 99, height: '100%' }, countdownGrid: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 18 }, timeCell: { alignItems: 'center', backgroundColor: '#0B1526', borderColor: '#30435E', borderRadius: 14, borderWidth: 1, paddingHorizontal: 7, paddingVertical: 14, width: '31.5%' }, daysCell: { borderColor: '#83323C' }, minutesCell: { borderColor: '#2D5E9D' }, daysValue: { color: '#F87171', fontSize: 33, fontVariant: ['tabular-nums'], fontWeight: '900' }, timeValue: { color: '#F8FAFC', fontSize: 30, fontVariant: ['tabular-nums'], fontWeight: '900' }, timeLabel: { color: '#8FA0B8', fontSize: 9, fontWeight: '900', letterSpacing: 0.8, marginTop: 4 },
-  sectionHeader: { alignItems: 'flex-end', flexDirection: 'row', justifyContent: 'space-between', marginBottom: 13, marginTop: 28 }, sectionTitleBox: { flex: 1, paddingRight: 8 }, sectionKicker: { color: '#71829B', fontSize: 9, fontWeight: '800', letterSpacing: 0.85 }, sectionTitle: { color: '#F8FAFC', fontSize: 23, fontWeight: '900', marginTop: 4 }, actionButton: { backgroundColor: '#1D4ED8', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10 }, actionLabel: { color: '#EFF6FF', fontSize: 10, fontWeight: '900', letterSpacing: 0.6 }, outlineButton: { borderColor: '#3A6EB1', borderRadius: 9, borderWidth: 1, paddingHorizontal: 11, paddingVertical: 9 }, outlineLabel: { color: '#93C5FD', fontSize: 10, fontWeight: '900' },
-  metricGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 10 }, metricCard: { backgroundColor: '#101D33', borderColor: '#2C405D', borderRadius: 16, borderWidth: 1, minHeight: 165, padding: 15, width: '48.5%' }, metricCardRed: { borderColor: '#6F3641' }, metricName: { color: '#CFDAE9', fontSize: 14, fontWeight: '800', lineHeight: 18, minHeight: 38 }, metricValue: { color: '#60A5FA', fontSize: 30, fontVariant: ['tabular-nums'], fontWeight: '900', marginTop: 11 }, metricUnit: { color: '#ABB9CD', fontSize: 12, fontWeight: '700', marginTop: 3 }, metricDate: { color: '#73849D', fontSize: 10, lineHeight: 14, marginTop: 11 },
-  governmentStack: { gap: 10 }, governmentCard: { backgroundColor: '#101D33', borderColor: '#2C405D', borderRadius: 15, borderWidth: 1, padding: 15 }, governmentTop: { flexDirection: 'row', justifyContent: 'space-between' }, governmentName: { color: '#D5E1F0', flex: 1, fontSize: 14, fontWeight: '800' }, linkGlyph: { color: '#60A5FA', fontSize: 18 }, governmentValue: { color: '#60A5FA', fontSize: 25, fontWeight: '900', marginTop: 10 }, governmentMeta: { color: '#8191A9', fontSize: 11, marginTop: 4 },
-  quoteCard: { backgroundColor: '#101D33', borderColor: '#335B8C', borderRadius: 16, borderWidth: 1, padding: 17 }, quoteMark: { color: '#60A5FA', fontSize: 40, fontWeight: '900', height: 36 }, quoteText: { color: '#F4F8FF', fontSize: 18, fontStyle: 'italic', lineHeight: 27 }, quoteMeta: { color: '#8798AF', fontSize: 11, marginTop: 14 }, copyButton: { alignSelf: 'flex-start', backgroundColor: '#0A2540', borderColor: '#285C98', borderRadius: 8, borderWidth: 1, marginTop: 15, paddingHorizontal: 11, paddingVertical: 9 }, copyLabel: { color: '#BBD8FF', fontSize: 10, fontWeight: '900', letterSpacing: 0.6 },
-  statusCard: { backgroundColor: '#101D33', borderColor: '#2C405D', borderRadius: 15, borderWidth: 1, padding: 14 }, statusRow: { alignItems: 'center', flexDirection: 'row', paddingVertical: 9 }, statusDot: { backgroundColor: '#34D399', borderRadius: 99, height: 7, marginRight: 10, width: 7 }, statusBad: { backgroundColor: '#F87171' }, statusWarn: { backgroundColor: '#FBBF24' }, statusName: { color: '#D4DEEC', flex: 1, fontSize: 13, fontWeight: '700' }, statusValue: { color: '#6EE7B7', fontSize: 10, fontWeight: '900' }, statusTextBad: { color: '#FCA5A5' }, statusTextWarn: { color: '#FCD34D' },
-  alertCard: { backgroundColor: '#101D33', borderColor: '#2C405D', borderRadius: 15, borderWidth: 1, padding: 14 }, alertRow: { flexDirection: 'row', paddingVertical: 7 }, alertIcon: { color: '#FBBF24', fontSize: 18, fontWeight: '900', marginRight: 10 }, alertBody: { flex: 1 }, alertTitle: { color: '#E7EDF8', fontSize: 13, fontWeight: '800' }, alertMessage: { color: '#B7C5D9', fontSize: 12, lineHeight: 17, marginTop: 3 }, alertDate: { color: '#71829B', fontSize: 10, marginTop: 5 },
-  searchRow: { flexDirection: 'row', gap: 9 }, searchInput: { backgroundColor: '#101D33', borderColor: '#304766', borderRadius: 11, borderWidth: 1, color: '#F8FAFC', flex: 1, fontSize: 14, paddingHorizontal: 13, paddingVertical: 11 }, searchButton: { alignItems: 'center', backgroundColor: '#1D4ED8', borderRadius: 11, justifyContent: 'center', paddingHorizontal: 13 }, searchLabel: { color: '#EFF6FF', fontSize: 10, fontWeight: '900' }, newsStack: { gap: 12, marginTop: 15 }, newsCard: { backgroundColor: '#101D33', borderColor: '#2C405D', borderRadius: 16, borderWidth: 1, padding: 15 }, newsHeader: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' }, newsSource: { backgroundColor: '#3D1720', borderRadius: 5, paddingHorizontal: 7, paddingVertical: 4 }, newsSourceText: { color: '#FDA4AF', fontSize: 10, fontWeight: '900' }, newsDate: { color: '#74859E', fontSize: 10 }, newsTitle: { color: '#F0F5FD', fontSize: 17, fontWeight: '900', lineHeight: 23, marginTop: 11 }, summaryBox: { backgroundColor: '#0A182B', borderLeftColor: '#3B82F6', borderLeftWidth: 3, marginTop: 12, padding: 11 }, summaryLabel: { color: '#60A5FA', fontSize: 9, fontWeight: '900', letterSpacing: 0.9 }, summaryText: { color: '#C6D3E6', fontSize: 13, fontStyle: 'italic', lineHeight: 19, marginTop: 4 }, newsDescription: { color: '#B7C5D9', fontSize: 13, lineHeight: 19, marginTop: 11 }, newsActions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14 }, newsAction: { backgroundColor: '#0A2540', borderRadius: 7, paddingHorizontal: 9, paddingVertical: 8 }, newsActionLabel: { color: '#BBD8FF', fontSize: 10, fontWeight: '900' }, reportAction: { paddingHorizontal: 3, paddingVertical: 8 }, reportLabel: { color: '#FCA5A5', fontSize: 9, fontWeight: '900' },
-  errorCard: { backgroundColor: '#3F151C', borderColor: '#EF4444', borderRadius: 14, borderWidth: 1, marginTop: 18, padding: 15 }, errorTitle: { color: '#FECACA', fontSize: 15, fontWeight: '900' }, errorText: { color: '#FEE2E2', fontSize: 13, lineHeight: 19, marginTop: 4 }, loadingCard: { alignItems: 'center', backgroundColor: '#101D33', borderColor: '#304766', borderRadius: 14, borderWidth: 1, flexDirection: 'row', gap: 10, marginTop: 18, padding: 16 }, loadingText: { color: '#CBD5E1', fontSize: 14 }, emptyCard: { backgroundColor: '#101D33', borderColor: '#2C405D', borderRadius: 14, borderWidth: 1, padding: 17 }, emptyText: { color: '#9DB0C7', fontSize: 13, lineHeight: 19 }, footer: { color: '#64748B', fontSize: 11, marginTop: 24, textAlign: 'center' },
+  appSurface: {
+    flex: 1,
+    backgroundColor: '#020617',
+    paddingTop: Constants.statusBarHeight,
+  },
+  webViewContainer: {
+    flex: 1,
+    backgroundColor: '#020617',
+  },
+  webView: {
+    flex: 1,
+    backgroundColor: '#020617',
+  },
+  centeredSurface: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#020617',
+    padding: 24,
+  },
+  errorTitle: {
+    color: '#F8FAFC',
+    fontSize: 20,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  errorMessage: {
+    color: '#94A3B8',
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: '#2563EB',
+    borderRadius: 8,
+    marginTop: 20,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+  },
+  retryLabel: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });

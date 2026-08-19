@@ -3,7 +3,7 @@
     "name": "TrumpWatch",
     "slug": "trumpwatch",
     "owner": "waltersimf",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "extra": {
       "dashboardApiBaseUrl": "https://trumpdash-njn2ba2j.manus.space",
       "eas": {
@@ -18,7 +18,7 @@
     },
     "android": {
       "package": "space.manus.trumpwatch",
-      "versionCode": 2,
+      "versionCode": 3,
       "permissions": [
         "android.permission.INTERNET"
       ],

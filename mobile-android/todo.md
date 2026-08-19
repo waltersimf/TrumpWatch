@@ -58,3 +58,12 @@
 - [x] Підвищити Android `versionCode` до 2 та оновити ключ локального cache snapshot
 - [x] Зібрати preview APK 1.0.1 з перевіреним production-контрактом
 - [ ] Перевірити APK 1.0.1 на планшеті: цитату, урядові показники й два API-статуси
+
+## Exact Web Parity 1.0.2
+- [x] Зафіксувати production `client/` як єдиний canonical UI
+- [x] Замінити custom React Native dashboard на WebView production application
+- [x] Зберегти widget cache, background refresh і обидва Android widgets
+- [x] Додати Android Back та безпечне відкриття зовнішніх посилань
+- [x] Задокументувати неминучі platform differences до реалізації
+- [ ] Зібрати preview APK 1.0.2
+- [ ] Порівняти APK з production web на телефоні та планшеті
